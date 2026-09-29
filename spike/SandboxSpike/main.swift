@@ -178,7 +178,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         add(menu, "3秒後に英数へ（手動テスト）", #selector(testEisu))
         add(menu, "3秒後にかなへ（手動テスト）", #selector(testKana))
         add(menu, "ログを開く", #selector(openLog))
-        add(menu, "終了", #selector(NSApplication.terminate(_:)))
+        add(menu, "終了", #selector(quit))
     }
 
     @discardableResult
@@ -198,6 +198,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func testEisu() { DispatchQueue.main.asyncAfter(deadline: .now() + 3) { switchInput(eisu: true, reason: "manual") } }
     @objc func testKana() { DispatchQueue.main.asyncAfter(deadline: .now() + 3) { switchInput(eisu: false, reason: "manual") } }
     @objc func openLog() { NSWorkspace.shared.open(logURL) }
+    @objc func quit() { NSApp.terminate(nil) }
 }
 
 let app = NSApplication.shared
