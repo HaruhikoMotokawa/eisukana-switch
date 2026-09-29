@@ -6,24 +6,23 @@ struct EisuKanaSwitchApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarContent()
+            MenuBarContent(controller: appDelegate.controller)
         } label: {
-            Text("⌘英")
+            // 塗りつぶしなら有効、線画なら無効（F-04）。SF Symbols はテンプレート画像として
+            // 描かれるので、ライト / ダークどちらのメニューバーでもそのまま読める。
+            Image(systemName: appDelegate.controller.isEnabled ? "command.circle.fill" : "command.circle")
+                .accessibilityLabel(Text(menuBarLabel))
         }
         .menuBarExtraStyle(.menu)
-    }
-}
 
-struct MenuBarContent: View {
-    var body: some View {
-        Button("about") {
-            NSApp.orderFrontStandardAboutPanel(nil)
-            NSApp.activate(ignoringOtherApps: true)
+        Window("about_window_title", id: AboutWindow.id) {
+            AboutView()
         }
-        Divider()
-        Button("quit") {
-            NSApp.terminate(nil)
-        }
-        .keyboardShortcut("q")
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
+    }
+
+    private var menuBarLabel: LocalizedStringKey {
+        appDelegate.controller.isEnabled ? "menu_bar_enabled" : "menu_bar_disabled"
     }
 }
