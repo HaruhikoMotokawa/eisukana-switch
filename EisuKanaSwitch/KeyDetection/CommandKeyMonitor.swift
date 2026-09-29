@@ -7,6 +7,8 @@ import OSLog
 protocol CommandKeyMonitoring: AnyObject {
     /// 単独押下の通知先。監視を始める前に設定する。
     var onSoloCommand: ((CommandSide) -> Void)? { get set }
+    /// 監視中に入力監視の許可が外れて、監視を止めたときの通知先（F-06）。
+    var onPermissionLost: (() -> Void)? { get set }
     /// 監視中か。
     var isRunning: Bool { get }
     /// 監視を開始する。開始できなければ false。
@@ -22,6 +24,7 @@ protocol CommandKeyMonitoring: AnyObject {
 @MainActor
 final class CommandKeyMonitor: CommandKeyMonitoring {
     var onSoloCommand: ((CommandSide) -> Void)?
+    var onPermissionLost: (() -> Void)?
     private var detector = SoloCommandDetector()
     private var tap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -51,7 +54,7 @@ final class CommandKeyMonitor: CommandKeyMonitoring {
     ///
     /// 未許可でも `CGEvent.tapCreate` 自体は成功してしまい、イベントが届かないまま
     /// `tapDisabledByUserInput` が繰り返されるので、事前に権限を確認する（Spike #1）。
-    /// 権限の案内と、許可された後の再試行は #6 で扱う。
+    /// 未許可のときの案内と、許可された後の再開は `SwitchingController` が受け持つ。
     @discardableResult
     func start() -> Bool {
         guard !isRunning else { return true }
@@ -139,6 +142,7 @@ final class CommandKeyMonitor: CommandKeyMonitoring {
         guard CGPreflightListenEventAccess() else {
             Logger.keyMonitor.error("tap disabled (\(reason, privacy: .public)) and input monitoring is not granted; stopping")
             stop()
+            onPermissionLost?()
             return
         }
         Logger.keyMonitor.notice("tap disabled (\(reason, privacy: .public)); re-enabling")

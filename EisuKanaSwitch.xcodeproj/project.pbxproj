@@ -32,6 +32,9 @@
 		AA0100000000000000000034 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000034 /* AppInfo.swift */; };
 		AA0100000000000000000035 /* SwitchingControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000035 /* SwitchingControllerTests.swift */; };
 		AA0100000000000000000036 /* AppInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000036 /* AppInfoTests.swift */; };
+		AA0100000000000000000040 /* InputMonitoringPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000040 /* InputMonitoringPermission.swift */; };
+		AA0100000000000000000041 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000041 /* PermissionView.swift */; };
+		AA0100000000000000000042 /* PermissionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000042 /* PermissionWindowController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +77,9 @@
 		AA0200000000000000000034 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		AA0200000000000000000035 /* SwitchingControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchingControllerTests.swift; sourceTree = "<group>"; };
 		AA0200000000000000000036 /* AppInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoTests.swift; sourceTree = "<group>"; };
+		AA0200000000000000000040 /* InputMonitoringPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMonitoringPermission.swift; sourceTree = "<group>"; };
+		AA0200000000000000000041 /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
+		AA0200000000000000000042 /* PermissionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +116,7 @@
 				AA0200000000000000000007 /* AppDelegate.swift */,
 				AA0200000000000000000030 /* SwitchingController.swift */,
 				AA0700000000000000000009 /* Menu */,
+				AA070000000000000000000A /* Permission */,
 				AA0700000000000000000005 /* KeyDetection */,
 				AA0700000000000000000007 /* InputSource */,
 				AA0700000000000000000008 /* Settings */,
@@ -191,6 +198,16 @@
 				AA0200000000000000000033 /* AboutView.swift */,
 			);
 			path = Menu;
+			sourceTree = "<group>";
+		};
+		AA070000000000000000000A /* Permission */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200000000000000000040 /* InputMonitoringPermission.swift */,
+				AA0200000000000000000041 /* PermissionView.swift */,
+				AA0200000000000000000042 /* PermissionWindowController.swift */,
+			);
+			path = Permission;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -309,6 +326,9 @@
 				AA0100000000000000000032 /* MenuBarContent.swift in Sources */,
 				AA0100000000000000000033 /* AboutView.swift in Sources */,
 				AA0100000000000000000034 /* AppInfo.swift in Sources */,
+				AA0100000000000000000040 /* InputMonitoringPermission.swift in Sources */,
+				AA0100000000000000000041 /* PermissionView.swift in Sources */,
+				AA0100000000000000000042 /* PermissionWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
