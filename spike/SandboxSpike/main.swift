@@ -106,7 +106,10 @@ func handle(type: CGEventType, event: CGEvent) {
             interrupted = true
         }
     default:
-        if pendingCommand != nil { interrupted = true }
+        if pendingCommand != nil {
+            if !interrupted { log("other event during ⌘: type=\(type.rawValue)") }
+            interrupted = true
+        }
     }
 }
 
@@ -142,6 +145,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         log("sources: " + enabledSources().compactMap { stringProperty($0, kTISPropertyInputSourceID) }.joined(separator: ", "))
         log("current: \(currentInputSourceID())  log: \(logURL.path)")
         startTap()
+        runArgumentTests()
+    }
+
+    // 例: open EisuKanaSpike.app --args --method tis --test eisu
+    func runArgumentTests() {
+        let args = UserDefaults.standard
+        if let m = args.string(forKey: "method") {
+            switchMethod = m == "tis" ? .tis : .post
+            log("method = \(switchMethod.rawValue) (args)")
+        }
+        if let t = args.string(forKey: "test") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { switchInput(eisu: t == "eisu", reason: "args") }
+        }
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
