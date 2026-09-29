@@ -10,14 +10,21 @@
 		AA0100000000000000000001 /* EisuKanaSwitchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000001 /* EisuKanaSwitchApp.swift */; };
 		AA0100000000000000000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000002 /* Assets.xcassets */; };
 		AA0100000000000000000003 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000003 /* Localizable.xcstrings */; };
-		AA0100000000000000000005 /* InputSourceTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000020 /* InputSourceTarget.swift */; };
-		AA0100000000000000000006 /* InputSourceDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000021 /* InputSourceDescriptor.swift */; };
-		AA0100000000000000000007 /* InputSourceSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000022 /* InputSourceSelector.swift */; };
-		AA0100000000000000000008 /* InputSourceRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000023 /* InputSourceRepository.swift */; };
-		AA0100000000000000000009 /* InputSourceSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000024 /* InputSourceSwitcher.swift */; };
-		AA010000000000000000000A /* InputSourceFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000025 /* InputSourceFixtures.swift */; };
-		AA010000000000000000000B /* InputSourceSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000026 /* InputSourceSelectorTests.swift */; };
-		AA010000000000000000000C /* InputSourceSwitcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000027 /* InputSourceSwitcherTests.swift */; };
+		AA0100000000000000000005 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000007 /* AppDelegate.swift */; };
+		AA0100000000000000000006 /* CommandSide.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000008 /* CommandSide.swift */; };
+		AA0100000000000000000007 /* SoloCommandDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000009 /* SoloCommandDetector.swift */; };
+		AA0100000000000000000008 /* CommandKeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA020000000000000000000A /* CommandKeyMonitor.swift */; };
+		AA0100000000000000000009 /* Logger+Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA020000000000000000000B /* Logger+Category.swift */; };
+		AA010000000000000000000A /* SoloCommandDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA020000000000000000000C /* SoloCommandDetectorTests.swift */; };
+		AA010000000000000000000B /* ModifierFlagsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA020000000000000000000D /* ModifierFlagsTests.swift */; };
+		AA0100000000000000000020 /* InputSourceTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000020 /* InputSourceTarget.swift */; };
+		AA0100000000000000000021 /* InputSourceDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000021 /* InputSourceDescriptor.swift */; };
+		AA0100000000000000000022 /* InputSourceSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000022 /* InputSourceSelector.swift */; };
+		AA0100000000000000000023 /* InputSourceRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000023 /* InputSourceRepository.swift */; };
+		AA0100000000000000000024 /* InputSourceSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000024 /* InputSourceSwitcher.swift */; };
+		AA0100000000000000000025 /* InputSourceFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000025 /* InputSourceFixtures.swift */; };
+		AA0100000000000000000026 /* InputSourceSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000026 /* InputSourceSelectorTests.swift */; };
+		AA0100000000000000000027 /* InputSourceSwitcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000027 /* InputSourceSwitcherTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +41,13 @@
 		AA0200000000000000000001 /* EisuKanaSwitchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EisuKanaSwitchApp.swift; sourceTree = "<group>"; };
 		AA0200000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0200000000000000000003 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		AA0200000000000000000007 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		AA0200000000000000000008 /* CommandSide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandSide.swift; sourceTree = "<group>"; };
+		AA0200000000000000000009 /* SoloCommandDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoloCommandDetector.swift; sourceTree = "<group>"; };
+		AA020000000000000000000A /* CommandKeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandKeyMonitor.swift; sourceTree = "<group>"; };
+		AA020000000000000000000B /* Logger+Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Category.swift"; sourceTree = "<group>"; };
+		AA020000000000000000000C /* SoloCommandDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoloCommandDetectorTests.swift; sourceTree = "<group>"; };
+		AA020000000000000000000D /* ModifierFlagsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierFlagsTests.swift; sourceTree = "<group>"; };
 		AA0200000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0200000000000000000006 /* EisuKanaSwitch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EisuKanaSwitch.entitlements; sourceTree = "<group>"; };
 		AA0200000000000000000010 /* EisuKanaSwitch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EisuKanaSwitch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,7 +93,10 @@
 			isa = PBXGroup;
 			children = (
 				AA0200000000000000000001 /* EisuKanaSwitchApp.swift */,
-				AA0700000000000000000005 /* InputSource */,
+				AA0200000000000000000007 /* AppDelegate.swift */,
+				AA0700000000000000000005 /* KeyDetection */,
+				AA0700000000000000000007 /* InputSource */,
+				AA0700000000000000000006 /* Support */,
 				AA0200000000000000000002 /* Assets.xcassets */,
 				AA0200000000000000000003 /* Localizable.xcstrings */,
 				AA0200000000000000000005 /* Info.plist */,
@@ -91,11 +108,31 @@
 		AA0700000000000000000003 /* EisuKanaSwitchTests */ = {
 			isa = PBXGroup;
 			children = (
+				AA020000000000000000000C /* SoloCommandDetectorTests.swift */,
+				AA020000000000000000000D /* ModifierFlagsTests.swift */,
 				AA0200000000000000000025 /* InputSourceFixtures.swift */,
 				AA0200000000000000000026 /* InputSourceSelectorTests.swift */,
 				AA0200000000000000000027 /* InputSourceSwitcherTests.swift */,
 			);
 			path = EisuKanaSwitchTests;
+			sourceTree = "<group>";
+		};
+		AA0700000000000000000005 /* KeyDetection */ = {
+			isa = PBXGroup;
+			children = (
+				AA0200000000000000000008 /* CommandSide.swift */,
+				AA0200000000000000000009 /* SoloCommandDetector.swift */,
+				AA020000000000000000000A /* CommandKeyMonitor.swift */,
+			);
+			path = KeyDetection;
+			sourceTree = "<group>";
+		};
+		AA0700000000000000000006 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				AA020000000000000000000B /* Logger+Category.swift */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 		AA0700000000000000000004 /* Products */ = {
@@ -107,7 +144,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AA0700000000000000000005 /* InputSource */ = {
+		AA0700000000000000000007 /* InputSource */ = {
 			isa = PBXGroup;
 			children = (
 				AA0200000000000000000020 /* InputSourceTarget.swift */,
@@ -220,11 +257,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0100000000000000000001 /* EisuKanaSwitchApp.swift in Sources */,
-				AA0100000000000000000005 /* InputSourceTarget.swift in Sources */,
-				AA0100000000000000000006 /* InputSourceDescriptor.swift in Sources */,
-				AA0100000000000000000007 /* InputSourceSelector.swift in Sources */,
-				AA0100000000000000000008 /* InputSourceRepository.swift in Sources */,
-				AA0100000000000000000009 /* InputSourceSwitcher.swift in Sources */,
+				AA0100000000000000000005 /* AppDelegate.swift in Sources */,
+				AA0100000000000000000006 /* CommandSide.swift in Sources */,
+				AA0100000000000000000007 /* SoloCommandDetector.swift in Sources */,
+				AA0100000000000000000008 /* CommandKeyMonitor.swift in Sources */,
+				AA0100000000000000000009 /* Logger+Category.swift in Sources */,
+				AA0100000000000000000020 /* InputSourceTarget.swift in Sources */,
+				AA0100000000000000000021 /* InputSourceDescriptor.swift in Sources */,
+				AA0100000000000000000022 /* InputSourceSelector.swift in Sources */,
+				AA0100000000000000000023 /* InputSourceRepository.swift in Sources */,
+				AA0100000000000000000024 /* InputSourceSwitcher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,9 +274,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA010000000000000000000A /* InputSourceFixtures.swift in Sources */,
-				AA010000000000000000000B /* InputSourceSelectorTests.swift in Sources */,
-				AA010000000000000000000C /* InputSourceSwitcherTests.swift in Sources */,
+				AA010000000000000000000A /* SoloCommandDetectorTests.swift in Sources */,
+				AA010000000000000000000B /* ModifierFlagsTests.swift in Sources */,
+				AA0100000000000000000025 /* InputSourceFixtures.swift in Sources */,
+				AA0100000000000000000026 /* InputSourceSelectorTests.swift in Sources */,
+				AA0100000000000000000027 /* InputSourceSwitcherTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

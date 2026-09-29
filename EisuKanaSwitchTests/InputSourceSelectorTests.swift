@@ -196,7 +196,7 @@ struct KanaSelectionTests {
 }
 
 @Suite("左右 ⌘ の割り当て")
-struct CommandSideTests {
+struct CommandSideAssignmentTests {
     @Test("左 ⌘ は英数、右 ⌘ はかな（F-01 / F-02）")
     func defaultAssignment() {
         #expect(CommandSide.left.inputSourceTarget == .eisu)
