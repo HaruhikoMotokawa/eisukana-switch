@@ -57,12 +57,10 @@ App Store 版と Developer ID 版は、同一のソースコード・同一の S
 
 - 実装: Swift / SwiftUI（`MenuBarExtra`）、自動起動は `SMAppService`
 - キー検出: `CGEventTap`（`flagsChanged` を監視して、左右 ⌘ の単独押下を判定する）
-- 入力ソース切り替えの候補:
-  - A) 英数/かなのキーイベント（`kVK_JIS_Eisu` / `kVK_JIS_Kana`）を送る。元アプリと同じ方式で、IME との相性が良い
-  - B) `TISSelectInputSource` で入力ソースを直接選ぶ
+- 入力ソース切り替え: `TISSelectInputSource`
+- 必要な権限は「入力監視」のみ。アクセシビリティ / PostEvent は使わない
 
-**リスク**: App Sandbox の下では、イベントタップを listen-only にする必要がある（入力監視の権限）。またイベントを送る場合は `CGRequestPostEventAccess` が必要になる。この組み合わせで App Store の審査を通せるかは、最初に検証（Spike）する。
-検証の結果によっては、App Store 版だけ機能を制限する、または App Store 配布を断念することもあり得る。
+Spike #1 の結果は [spike-1-sandbox.md](spike-1-sandbox.md) を参照。App Review の判断だけは、実際に提出するまでわからない。
 
 ## 7. スコープ外
 
