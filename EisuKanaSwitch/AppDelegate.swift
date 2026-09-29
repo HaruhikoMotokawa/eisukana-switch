@@ -1,27 +1,20 @@
 import AppKit
-import OSLog
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private lazy var keyMonitor = CommandKeyMonitor { [weak self] side in
-        self?.handleSoloCommand(side)
-    }
+    /// ⌘ の監視と入力ソースの切り替えをまとめて持つ。`MenuBarExtra` がアイコンの
+    /// 見た目を決めるのに読むので、`applicationDidFinishLaunching` より先に作られる。
+    lazy var controller = SwitchingController(
+        monitor: CommandKeyMonitor(),
+        switcher: InputSourceSwitcher(repository: CarbonInputSourceRepository()),
+        store: UserDefaultsEnabledStateStore()
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        keyMonitor.start()
+        controller.start()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        keyMonitor.stop()
-    }
-
-    /// 入力ソースの切り替えは #4 で実装する。今はログに出すだけ。
-    private func handleSoloCommand(_ side: CommandSide) {
-        switch side {
-        case .left:
-            Logger.keyMonitor.notice("left command tapped (eisu)")
-        case .right:
-            Logger.keyMonitor.notice("right command tapped (kana)")
-        }
+        controller.stop()
     }
 }

@@ -2,12 +2,26 @@ import AppKit
 import CoreGraphics
 import OSLog
 
+/// 左右 ⌘ の単独押下を通知する監視。実装を差し替えてテストできるようにしている。
+@MainActor
+protocol CommandKeyMonitoring: AnyObject {
+    /// 単独押下の通知先。監視を始める前に設定する。
+    var onSoloCommand: ((CommandSide) -> Void)? { get set }
+    /// 監視中か。
+    var isRunning: Bool { get }
+    /// 監視を開始する。開始できなければ false。
+    @discardableResult
+    func start() -> Bool
+    /// 監視を止める。
+    func stop()
+}
+
 /// listen-only の `CGEventTap` でキー入力を監視し、左右 ⌘ の単独押下を通知する。
 ///
 /// イベントを止めたり書き換えたりはしないので、必要な権限は「入力監視」だけ（Spike #1）。
 @MainActor
-final class CommandKeyMonitor {
-    private let onSoloCommand: (CommandSide) -> Void
+final class CommandKeyMonitor: CommandKeyMonitoring {
+    var onSoloCommand: ((CommandSide) -> Void)?
     private var detector = SoloCommandDetector()
     private var tap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -15,7 +29,7 @@ final class CommandKeyMonitor {
 
     var isRunning: Bool { tap != nil }
 
-    init(onSoloCommand: @escaping (CommandSide) -> Void) {
+    init(onSoloCommand: ((CommandSide) -> Void)? = nil) {
         self.onSoloCommand = onSoloCommand
     }
 
@@ -115,7 +129,7 @@ final class CommandKeyMonitor {
     private func emit(_ side: CommandSide?) {
         guard let side else { return }
         Logger.keyMonitor.debug("solo command: \(String(describing: side), privacy: .public)")
-        onSoloCommand(side)
+        onSoloCommand?(side)
     }
 
     /// 無効化されたタップを有効に戻す。取りこぼしがあり得るので、状態機械は必ず捨てる。
