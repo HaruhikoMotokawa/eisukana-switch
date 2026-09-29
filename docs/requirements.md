@@ -60,7 +60,7 @@ App Store 版と Developer ID 版は、同一のソースコード・同一の S
 - 入力ソース切り替え: `TISSelectInputSource`
 - 必要な権限は「入力監視」のみ。アクセシビリティ / PostEvent は使わない
 
-Spike #1 の結果は [spike-1-sandbox.md](spike-1-sandbox.md) を参照。App Review の判断だけは、実際に提出するまでわからない。
+Spike #1 の結果は [spike-1-sandbox.md](spike-1-sandbox.md)、入力ソースの切り替え先の決め方は [input-source-switching.md](input-source-switching.md) を参照。App Review の判断だけは、実際に提出するまでわからない。
 
 ## 7. スコープ外
 
