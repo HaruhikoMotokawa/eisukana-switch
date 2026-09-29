@@ -8,8 +8,9 @@ struct MenuBarContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        // 未許可の間は切り替えが起きないので、理由と行き先を一番上に出す（F-06）。
-        if !controller.hasInputMonitoringPermission {
+        // 有効なのに未許可だと切り替えが起きないので、理由と行き先を一番上に出す（F-06）。
+        // 無効のときは元々切り替えないので、許可の話は出さない。
+        if controller.isEnabled, !controller.hasInputMonitoringPermission {
             Text("permission_menu_status")
             Button("permission_open_settings") {
                 controller.openInputMonitoringSettings()

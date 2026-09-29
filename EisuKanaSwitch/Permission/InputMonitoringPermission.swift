@@ -22,11 +22,12 @@ protocol InputMonitoringPermitting: AnyObject {
 
 /// `CGPreflightListenEventAccess` で状態を見る実装。
 ///
-/// 許可されても、監視を作り直すまでは反映されない。状態の変化を通知できるように、
-/// 見張っている間だけタイマーで定期的に確認する（Spike #1）。
+/// 許可されても、監視を作り直すまでは反映されない。許可されたことを知る手段は
+/// 用意されていないので、見張っている間はタイマーで定期的に確認する（Spike #1）。
 @MainActor
 final class InputMonitoringPermission: InputMonitoringPermitting {
-    /// ユーザーがシステム設定で許可してから戻ってくるまでの間しか動かないので、短くてよい。
+    /// システム設定で許可されたことに気づくまでの間隔。許可されるまで動き続けるので、
+    /// 短くしすぎない。
     private static let pollingInterval: TimeInterval = 1
 
     private var timer: Timer?
@@ -55,6 +56,8 @@ final class InputMonitoringPermission: InputMonitoringPermitting {
                 self?.poll()
             }
         }
+        // 遅れても困らない。まとめて起こしてもらえるように余裕を伝えておく（N-01）。
+        timer.tolerance = Self.pollingInterval / 2
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
         Logger.permission.notice("watching input monitoring; granted=\(self.lastKnownState, privacy: .public)")

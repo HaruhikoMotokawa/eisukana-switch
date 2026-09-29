@@ -43,6 +43,8 @@ final class FakeInputMonitoringPermission: InputMonitoringPermitting {
     private(set) var openSettingsCount = 0
     private(set) var isWatching = false
     private var onChange: ((Bool) -> Void)?
+    /// 本物と同じく、見張り始めた時点の状態を基準にする。
+    private var lastKnownState = false
 
     init(isGranted: Bool = true) {
         self.isGranted = isGranted
@@ -59,6 +61,7 @@ final class FakeInputMonitoringPermission: InputMonitoringPermitting {
     func startWatching(onChange: @escaping (Bool) -> Void) {
         isWatching = true
         self.onChange = onChange
+        lastKnownState = isGranted
     }
 
     func stopWatching() {
@@ -66,10 +69,12 @@ final class FakeInputMonitoringPermission: InputMonitoringPermitting {
         onChange = nil
     }
 
-    /// ユーザーがシステム設定で許可状態を変えた、という想定で通知する。
+    /// ユーザーがシステム設定で許可状態を変えた、という想定。本物と同じく、
+    /// 見張っている間に変わったときだけ通知する。
     func change(to granted: Bool) {
         isGranted = granted
-        guard isWatching else { return }
+        guard isWatching, granted != lastKnownState else { return }
+        lastKnownState = granted
         onChange?(granted)
     }
 }
@@ -282,11 +287,40 @@ struct SwitchingControllerTests {
         #expect(monitor.isRunning)
     }
 
+    @Test("見張っていない間に許可されていたら、設定を開いたときに監視を始める")
+    func startsMonitorWhenSettingsOpenedAfterGrant() {
+        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        controller.start()
+        // 見張り始めた後にシステム設定で許可されたが、まだ確認しに行っていない状態。
+        permission.isGranted = true
+
+        controller.openInputMonitoringSettings()
+
+        #expect(controller.hasInputMonitoringPermission)
+        #expect(monitor.isRunning)
+        #expect(!permission.isWatching)
+    }
+
+    @Test("無効なら、設定を開いても監視は始めず、表示だけ合わせる")
+    func onlyRefreshesPermissionWhenDisabled() {
+        let (controller, monitor, _, _, permission) = Self.make(storedIsEnabled: false, isGranted: false)
+        controller.start()
+        permission.isGranted = true
+
+        controller.openInputMonitoringSettings()
+
+        #expect(controller.hasInputMonitoringPermission)
+        #expect(!monitor.isRunning)
+        #expect(!permission.isWatching)
+    }
+
     @Test("監視中に許可が外れたら、状態に反映してまた許可を待つ")
     func reflectsRevokedPermission() {
         let (controller, monitor, _, _, permission) = Self.make()
         controller.start()
 
+        // システム設定で許可が外されると、タップが無効になって監視が止まる。
+        permission.change(to: false)
         monitor.losePermission()
 
         #expect(!controller.hasInputMonitoringPermission)

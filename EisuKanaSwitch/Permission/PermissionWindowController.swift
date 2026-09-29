@@ -14,9 +14,10 @@ final class PermissionWindowController {
     func show(controller: SwitchingController) {
         let window = window ?? makeWindow(controller: controller)
         self.window = window
-        window.makeKeyAndOrderFront(nil)
-        // LSUIElement なのでアクティブなアプリにならない。自分で前面に出さないと後ろに開く。
-        NSApp.activate(ignoringOtherApps: true)
+        // LSUIElement なのでアクティブなアプリにならず、そのままだと前面に出ない。
+        // ただし奪い取りはしない。初回起動ではシステムの確認ダイアログが同時に出るので、
+        // `activate(ignoringOtherApps:)` で前に出ると、そちらを後ろへ追いやってしまう。
+        window.orderFrontRegardless()
     }
 
     private func makeWindow(controller: SwitchingController) -> NSWindow {

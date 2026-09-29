@@ -71,10 +71,16 @@ final class SwitchingController {
 
     /// メニューや案内の「システム設定を開く」から呼ぶ（F-06）。
     ///
-    /// 許可されたら再起動なしで監視を始めたいので、開くのと合わせて見張り始める。
+    /// 見張っていない間に許可されていることがあるので、開く前に状態を見直す。
+    /// まだ未許可なら、許可されたら再起動なしで始められるように見張り始める。
     func openInputMonitoringSettings() {
         permission.openSystemSettings()
-        watchPermission()
+        guard isEnabled else {
+            // 無効なら監視も待機も要らない。表示だけ合わせておく。
+            hasInputMonitoringPermission = permission.isGranted
+            return
+        }
+        startMonitoring(requestingPermission: false)
     }
 
     /// 監視を始める。未許可なら始めず、許可されるのを待つ。
@@ -95,7 +101,15 @@ final class SwitchingController {
             return
         }
         permission.stopWatching()
-        monitor.start()
+        startMonitor()
+    }
+
+    /// 監視を始める。許可されているのに始められないのは普通は起きないが、起きると
+    /// 何も反応しないまま「有効」に見えてしまうので、ログには残す。
+    private func startMonitor() {
+        if !monitor.start() {
+            Logger.app.error("could not start the monitor although input monitoring is granted")
+        }
     }
 
     /// 許可されるのを待つ。許可されたら、再起動せずにそのまま監視を始める（F-06）。
@@ -108,11 +122,11 @@ final class SwitchingController {
     private func handlePermissionChange(_ granted: Bool) {
         hasInputMonitoringPermission = granted
         guard granted else { return }
-        Logger.app.notice("input monitoring granted; starting the monitor")
         permission.stopWatching()
         // 待っている間に無効にされていることがあるので、ここでも見ておく。
         guard isEnabled else { return }
-        monitor.start()
+        Logger.app.notice("input monitoring granted; starting the monitor")
+        startMonitor()
     }
 
     /// 監視中に許可が外れて、監視が止まったとき。また案内を出し、許可し直されるのを待つ。
