@@ -1,0 +1,21 @@
+# EisuKana Switch
+
+左右の ⌘ キーを単独で押すだけで、英数 / かな を切り替える macOS メニューバーアプリです。
+
+- 左 ⌘ → 英数
+- 右 ⌘ → かな
+
+> 🚧 開発中です。要求定義は [docs/requirements.md](docs/requirements.md) を参照してください。
+
+## インストール（予定）
+
+- Mac App Store
+- Homebrew: `brew install --cask HaruhikoMotokawa/tap/eisukana-switch`
+
+## 謝辞
+
+このアプリは [⌘英かな (iMasanari/cmd-eikana)](https://github.com/iMasanari/cmd-eikana)（MIT License）に着想を得ています。
+
+## ライセンス
+
+[MIT](LICENSE)
