@@ -11,10 +11,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         permission: InputMonitoringPermission()
     )
 
+    /// ログイン時の自動起動（F-05）。メニューが ON/OFF の表示に読む。
+    let launchAtLogin = LaunchAtLogin(service: MainAppLoginItemService())
+
     private let permissionWindow = PermissionWindowController()
+    private var menuTrackingObserver: (any NSObjectProtocol)?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         controller.start()
+        // ログイン項目はシステム設定でも変えられるので、メニューを開くたびに読み直す。
+        menuTrackingObserver = NotificationCenter.default.addObserver(
+            forName: NSMenu.didBeginTrackingNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.launchAtLogin.refresh()
+            }
+        }
         // 有効なのに未許可だと、何も起きないアプリに見えてしまう。理由と行き先を出す（F-06）。
         if controller.isEnabled, !controller.hasInputMonitoringPermission {
             permissionWindow.show(controller: controller)

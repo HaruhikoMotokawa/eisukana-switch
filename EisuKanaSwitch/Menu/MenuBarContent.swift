@@ -1,9 +1,10 @@
 import AppKit
 import SwiftUI
 
-/// メニューバーのアイコンをクリックしたときに出るメニュー（F-04 / F-06）。
+/// メニューバーのアイコンをクリックしたときに出るメニュー（F-04 / F-05 / F-06）。
 struct MenuBarContent: View {
     let controller: SwitchingController
+    let launchAtLogin: LaunchAtLogin
 
     @Environment(\.openWindow) private var openWindow
 
@@ -21,6 +22,17 @@ struct MenuBarContent: View {
             get: { controller.isEnabled },
             set: { controller.setEnabled($0) }
         ))
+        Toggle("launch_at_login", isOn: Binding(
+            get: { launchAtLogin.isOn },
+            set: { launchAtLogin.setOn($0) }
+        ))
+        // 登録はされたが、システム設定で許可されるまでログイン時に起動しない。
+        if launchAtLogin.requiresApproval {
+            Text("login_item_requires_approval")
+            Button("login_item_open_settings") {
+                launchAtLogin.openSystemSettings()
+            }
+        }
         Divider()
         Button("about") {
             openAbout()
