@@ -6,7 +6,7 @@ struct EisuKanaSwitchApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarContent(controller: appDelegate.controller)
+            MenuBarContent(controller: appDelegate.controller, launchAtLogin: appDelegate.launchAtLogin)
         } label: {
             // 塗りつぶしなら有効、線画なら無効（F-04）。有効でも入力監視が未許可なら、
             // 切り替えが起きないことがアイコンでわかるようにする（F-06）。SF Symbols は
