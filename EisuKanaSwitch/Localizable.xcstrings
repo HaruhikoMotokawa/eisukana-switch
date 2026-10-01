@@ -239,6 +239,23 @@
         }
       }
     },
+    "menu_bar_monitor_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EisuKana Switch: could not start"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EisuKana Switch: 開始できませんでした"
+          }
+        }
+      }
+    },
     "menu_bar_no_permission" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -252,6 +269,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "EisuKana Switch: 入力監視が未許可"
+          }
+        }
+      }
+    },
+    "monitor_failed_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Input Monitoring is allowed, but switching could not be started. Please try again."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入力監視は許可されていますが、切り替えを開始できませんでした。もう一度試してください。"
+          }
+        }
+      }
+    },
+    "monitor_failed_menu_status" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Could not start switching"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ 切り替えを開始できませんでした"
+          }
+        }
+      }
+    },
+    "monitor_failed_retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度試す"
           }
         }
       }

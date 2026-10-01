@@ -11,17 +11,18 @@ struct PermissionView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: controller.hasInputMonitoringPermission
-                ? "checkmark.circle.fill"
-                : "exclamationmark.triangle.fill")
+            Image(systemName: isWorking ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                 .font(.system(size: 40))
-                .foregroundStyle(controller.hasInputMonitoringPermission ? Color.green : Color.orange)
+                .foregroundStyle(isWorking ? Color.green : Color.orange)
                 .accessibilityHidden(true)
 
             Text(controller.hasInputMonitoringPermission ? "permission_granted_title" : "permission_title")
                 .font(.title3.weight(.semibold))
 
-            if controller.hasInputMonitoringPermission {
+            if controller.status == .failedToStart {
+                // 許可はされたが監視を始められなかった。「開始しました」とは言えない（#24）。
+                Text("monitor_failed_body")
+            } else if controller.hasInputMonitoringPermission {
                 Text("permission_granted_body")
             } else {
                 Text("permission_body")
@@ -31,7 +32,13 @@ struct PermissionView: View {
             }
 
             HStack(spacing: 12) {
-                if controller.hasInputMonitoringPermission {
+                if controller.status == .failedToStart {
+                    Button("permission_close", action: onClose)
+                    Button("monitor_failed_retry") {
+                        controller.retryMonitoring()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                } else if controller.hasInputMonitoringPermission {
                     Button("permission_close", action: onClose)
                         .keyboardShortcut(.defaultAction)
                 } else {
@@ -49,5 +56,10 @@ struct PermissionView: View {
         .fixedSize(horizontal: false, vertical: true)
         .padding(24)
         .frame(width: 380)
+    }
+
+    /// 許可されて、切り替えが動き出せたか。許可されても始められなかったときは警告のままにする。
+    private var isWorking: Bool {
+        controller.hasInputMonitoringPermission && controller.status != .failedToStart
     }
 }
