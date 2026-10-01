@@ -1,4 +1,4 @@
-# リリース手順（Developer ID / GitHub Releases）
+# リリース手順（Developer ID / GitHub Releases / Homebrew）
 
 `v1.2.3` のようなタグを push すると、[Release ワークフロー](../.github/workflows/release.yml) が次を順に実行する。
 
@@ -7,8 +7,9 @@
 3. `.app` を `notarytool` で公証し、staple して zip にする
 4. その `.app` を入れた dmg を作り、署名・公証・staple する
 5. zip / dmg / `SHA256SUMS.txt` を GitHub Releases に上げる（リリースノートは自動生成）
+6. 正式版なら、[HaruhikoMotokawa/homebrew-tap](https://github.com/HaruhikoMotokawa/homebrew-tap) の `Casks/eisukana-switch.rb` の `version` と `sha256`（zip のもの）を書き換えて push する
 
-`v1.2.3-beta.1` のように `-` の付いたタグはプレリリースとして公開する。この場合も `CFBundleShortVersionString` は `1.2.3` になる。
+`v1.2.3-beta.1` のように `-` の付いたタグはプレリリースとして公開する。この場合も `CFBundleShortVersionString` は `1.2.3` になる。プレリリースでは Cask は更新しない。
 
 ## 前提
 
@@ -17,7 +18,7 @@
 
 ## GitHub Secrets
 
-リポジトリの Settings → Secrets and variables → Actions に、次の 5 つを登録する。Team ID は証明書の名前から取り出すので登録しなくてよい。
+リポジトリの Settings → Secrets and variables → Actions に、次の 6 つを登録する。Team ID は証明書の名前から取り出すので登録しなくてよい。
 
 | Secret | 内容 |
 | --- | --- |
@@ -26,6 +27,7 @@
 | `ASC_API_KEY_P8_BASE64` | App Store Connect API キー（`.p8`）を base64 にしたもの |
 | `ASC_API_KEY_ID` | API キーの Key ID |
 | `ASC_API_ISSUER_ID` | API キーの Issuer ID |
+| `HOMEBREW_TAP_TOKEN` | `homebrew-tap` に push できる Personal Access Token |
 
 ### 証明書（.p12）
 
@@ -48,6 +50,15 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
 
 書き出した `.p12` / `.p8` は、Secret に登録したら手元から消しておく。
 
+### Homebrew tap 用のトークン
+
+ワークフローの `GITHUB_TOKEN` は別リポジトリに push できないので、tap 専用のトークンを用意する。
+
+1. GitHub の Settings → Developer settings → Personal access tokens → Fine-grained tokens で新しいトークンを作る
+2. Repository access は「Only select repositories」で `HaruhikoMotokawa/homebrew-tap` だけを選ぶ
+3. Permissions は Repository permissions の「Contents」を Read and write にする
+4. 作ったトークンを `HOMEBREW_TAP_TOKEN` に登録する（有効期限が切れたら作り直して登録し直す）
+
 ## リリースする
 
 ```sh
@@ -68,6 +79,8 @@ git tag -f v0.1.0
 git push origin v0.1.0
 ```
 
+Cask の更新だけが失敗したとき（トークンの期限切れなど）は、ジョブを再実行するとリリースの作成で失敗するので、トークンを直したうえで Cask を手で更新する。`homebrew-tap` で `Casks/eisukana-switch.rb` の `version` と `sha256` を、リリースの `SHA256SUMS.txt` にある zip の値に書き換えて push すればよい。
+
 ### 公証に失敗したとき
 
 ログに出ている submission ID を使って、手元で理由を確認できる。
@@ -84,4 +97,12 @@ xcrun notarytool log <submission-id> --key AuthKey_XXXXXXXXXX.p8 --key-id <Key I
 xcrun stapler validate EisuKanaSwitch.app
 spctl --assess --type execute --verbose=4 EisuKanaSwitch.app
 # → accepted / source=Notarized Developer ID
+```
+
+Homebrew からのインストールは次のコマンドで確かめる。
+
+```sh
+brew update
+brew install --cask HaruhikoMotokawa/tap/eisukana-switch
+brew uninstall --zap --cask eisukana-switch   # 設定も含めて消す
 ```

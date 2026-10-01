@@ -1,6 +1,7 @@
 name: Release
 
-# v1.2.3 のようなタグを push すると、Developer ID 署名・公証済みの zip / dmg を GitHub Releases に上げる
+# v1.2.3 のようなタグを push すると、Developer ID 署名・公証済みの zip / dmg を GitHub Releases に上げ、
+# 正式版なら Homebrew tap の Cask も更新する
 # 必要な Secrets と手順は docs/release.md を参照
 on:
   push:
@@ -183,6 +184,34 @@ jobs:
             --title "$TAG" \
             --generate-notes \
             $PRERELEASE_FLAG
+
+      # 正式版のときだけ、tap の Cask を新しいバージョンと zip の sha256 に書き換える
+      - name: Update Homebrew Cask
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          SHA256="$(shasum -a 256 "dist/$ARTIFACT_NAME-$VERSION.zip" | awk '{print $1}')"
+          TAP_DIR="$RUNNER_TEMP/homebrew-tap"
+          CASK_PATH="Casks/eisukana-switch.rb"
+
+          gh auth setup-git
+          git clone --depth 1 https://github.com/HaruhikoMotokawa/homebrew-tap.git "$TAP_DIR"
+          cd "$TAP_DIR"
+          sed -i '' -E \
+            -e "s/^  version \".*\"$/  version \"$VERSION\"/" \
+            -e "s/^  sha256 \".*\"$/  sha256 \"$SHA256\"/" \
+            "$CASK_PATH"
+          git diff
+
+          if git diff --quiet; then
+            echo "Cask は更新済み"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "eisukana-switch $VERSION"
+          git push
 
       - name: Clean up
         if: always()
