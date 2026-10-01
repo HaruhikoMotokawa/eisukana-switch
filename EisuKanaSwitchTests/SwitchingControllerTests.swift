@@ -37,9 +37,9 @@ final class FakeCommandKeyMonitor: CommandKeyMonitoring {
     }
 }
 
-/// 入力監視の許可を、テストから自由に動かせるようにする。
+/// 入力監視・アクセシビリティの許可を、テストから自由に動かせるようにする。
 @MainActor
-final class FakeInputMonitoringPermission: InputMonitoringPermitting {
+final class FakeSystemPermission: SystemPermitting {
     var isGranted: Bool
     private(set) var requestCount = 0
     private(set) var openSettingsCount = 0
@@ -97,9 +97,9 @@ final class FakeInputSourceSwitcher: InputSourceSwitching {
     private(set) var activated: [InputSourceTarget] = []
 
     @discardableResult
-    func activate(_ target: InputSourceTarget) -> InputSourceSwitchResult {
+    func activate(_ target: InputSourceTarget) -> Bool {
         activated.append(target)
-        return .switched(id: target.rawValue)
+        return true
     }
 }
 
@@ -109,39 +109,43 @@ struct SwitchingControllerTests {
     /// テスト対象と、覗き込むためのフェイクをまとめて作る。
     private static func make(
         storedIsEnabled: Bool = true,
-        isGranted: Bool = true
+        isGranted: Bool = true,
+        isPostEventGranted: Bool = true
     ) -> (
         SwitchingController,
         FakeCommandKeyMonitor,
         FakeInputSourceSwitcher,
         FakeEnabledStateStore,
-        FakeInputMonitoringPermission
+        FakeSystemPermission,
+        FakeSystemPermission
     ) {
         let monitor = FakeCommandKeyMonitor()
         let switcher = FakeInputSourceSwitcher()
         let store = FakeEnabledStateStore(isEnabled: storedIsEnabled)
-        let permission = FakeInputMonitoringPermission(isGranted: isGranted)
+        let inputMonitoring = FakeSystemPermission(isGranted: isGranted)
+        let postEvent = FakeSystemPermission(isGranted: isPostEventGranted)
         let controller = SwitchingController(
             monitor: monitor,
             switcher: switcher,
             store: store,
-            permission: permission
+            inputMonitoring: inputMonitoring,
+            postEvent: postEvent
         )
-        return (controller, monitor, switcher, store, permission)
+        return (controller, monitor, switcher, store, inputMonitoring, postEvent)
     }
 
     @Test("保存された有効/無効を起動時に引き継ぐ")
     func restoresStoredState() {
-        let (enabled, _, _, _, _) = Self.make(storedIsEnabled: true)
+        let (enabled, _, _, _, _, _) = Self.make(storedIsEnabled: true)
         #expect(enabled.isEnabled)
 
-        let (disabled, _, _, _, _) = Self.make(storedIsEnabled: false)
+        let (disabled, _, _, _, _, _) = Self.make(storedIsEnabled: false)
         #expect(!disabled.isEnabled)
     }
 
     @Test("有効なら起動時に監視を始める")
     func startsMonitorWhenEnabled() {
-        let (controller, monitor, _, _, _) = Self.make(storedIsEnabled: true)
+        let (controller, monitor, _, _, _, _) = Self.make(storedIsEnabled: true)
 
         controller.start()
 
@@ -151,7 +155,7 @@ struct SwitchingControllerTests {
 
     @Test("無効なら起動時に監視を始めない")
     func doesNotStartMonitorWhenDisabled() {
-        let (controller, monitor, _, _, _) = Self.make(storedIsEnabled: false)
+        let (controller, monitor, _, _, _, _) = Self.make(storedIsEnabled: false)
 
         controller.start()
 
@@ -161,7 +165,7 @@ struct SwitchingControllerTests {
 
     @Test("左 ⌘ で英数、右 ⌘ でかなへ切り替える")
     func activatesTargetForEachSide() {
-        let (controller, monitor, switcher, _, _) = Self.make()
+        let (controller, monitor, switcher, _, _, _) = Self.make()
         controller.start()
 
         monitor.emit(.left)
@@ -172,7 +176,7 @@ struct SwitchingControllerTests {
 
     @Test("無効にすると監視を止め、設定を保存する")
     func disablingStopsMonitorAndPersists() {
-        let (controller, monitor, _, store, _) = Self.make()
+        let (controller, monitor, _, store, _, _) = Self.make()
         controller.start()
 
         controller.setEnabled(false)
@@ -185,7 +189,7 @@ struct SwitchingControllerTests {
 
     @Test("有効に戻すと監視を再開し、設定を保存する")
     func enablingStartsMonitorAndPersists() {
-        let (controller, monitor, _, store, _) = Self.make(storedIsEnabled: false)
+        let (controller, monitor, _, store, _, _) = Self.make(storedIsEnabled: false)
         controller.start()
 
         controller.setEnabled(true)
@@ -198,7 +202,7 @@ struct SwitchingControllerTests {
 
     @Test("無効の間に届いたイベントでは切り替えない")
     func ignoresEventsWhileDisabled() {
-        let (controller, monitor, switcher, _, _) = Self.make()
+        let (controller, monitor, switcher, _, _, _) = Self.make()
         controller.start()
         controller.setEnabled(false)
 
@@ -209,7 +213,7 @@ struct SwitchingControllerTests {
 
     @Test("同じ値をセットしても監視には触らない")
     func settingSameValueDoesNothing() {
-        let (controller, monitor, _, _, _) = Self.make()
+        let (controller, monitor, _, _, _, _) = Self.make()
         controller.start()
 
         controller.setEnabled(true)
@@ -220,7 +224,7 @@ struct SwitchingControllerTests {
 
     @Test("入力監視が未許可なら監視を始めず、有効のまま許可を待つ")
     func waitsForPermissionWhenNotGranted() {
-        let (controller, monitor, _, store, permission) = Self.make(isGranted: false)
+        let (controller, monitor, _, store, permission, _) = Self.make(isGranted: false)
 
         controller.start()
 
@@ -234,7 +238,7 @@ struct SwitchingControllerTests {
 
     @Test("初回起動で未許可なら、システムの確認ダイアログを出す")
     func requestsPermissionOnLaunch() {
-        let (controller, _, _, _, permission) = Self.make(isGranted: false)
+        let (controller, _, _, _, permission, _) = Self.make(isGranted: false)
 
         controller.start()
 
@@ -243,7 +247,7 @@ struct SwitchingControllerTests {
 
     @Test("許可されたら、再起動せずに監視を始める")
     func startsMonitorOncePermissionIsGranted() {
-        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        let (controller, monitor, _, _, permission, _) = Self.make(isGranted: false)
         controller.start()
 
         permission.change(to: true)
@@ -257,7 +261,7 @@ struct SwitchingControllerTests {
 
     @Test("許可を待つ間に無効にされたら、許可されても監視は始めない")
     func doesNotStartMonitorWhenDisabledWhileWaiting() {
-        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        let (controller, monitor, _, _, permission, _) = Self.make(isGranted: false)
         controller.start()
 
         controller.setEnabled(false)
@@ -269,7 +273,7 @@ struct SwitchingControllerTests {
 
     @Test("無効にすると、許可を待つのもやめる")
     func disablingStopsWatchingPermission() {
-        let (controller, _, _, _, permission) = Self.make(isGranted: false)
+        let (controller, _, _, _, permission, _) = Self.make(isGranted: false)
         controller.start()
 
         controller.setEnabled(false)
@@ -279,10 +283,10 @@ struct SwitchingControllerTests {
 
     @Test("「システム設定を開く」で設定を開き、許可を待ち始める")
     func openingSettingsStartsWatching() {
-        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        let (controller, monitor, _, _, permission, _) = Self.make(isGranted: false)
         controller.start()
 
-        controller.openInputMonitoringSettings()
+        controller.openSystemSettings(for: .inputMonitoring)
         permission.change(to: true)
 
         #expect(permission.openSettingsCount == 1)
@@ -291,12 +295,12 @@ struct SwitchingControllerTests {
 
     @Test("見張っていない間に許可されていたら、設定を開いたときに監視を始める")
     func startsMonitorWhenSettingsOpenedAfterGrant() {
-        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        let (controller, monitor, _, _, permission, _) = Self.make(isGranted: false)
         controller.start()
         // 見張り始めた後にシステム設定で許可されたが、まだ確認しに行っていない状態。
         permission.isGranted = true
 
-        controller.openInputMonitoringSettings()
+        controller.openSystemSettings(for: .inputMonitoring)
 
         #expect(controller.hasInputMonitoringPermission)
         #expect(monitor.isRunning)
@@ -305,11 +309,11 @@ struct SwitchingControllerTests {
 
     @Test("無効なら、設定を開いても監視は始めず、表示だけ合わせる")
     func onlyRefreshesPermissionWhenDisabled() {
-        let (controller, monitor, _, _, permission) = Self.make(storedIsEnabled: false, isGranted: false)
+        let (controller, monitor, _, _, permission, _) = Self.make(storedIsEnabled: false, isGranted: false)
         controller.start()
         permission.isGranted = true
 
-        controller.openInputMonitoringSettings()
+        controller.openSystemSettings(for: .inputMonitoring)
 
         #expect(controller.hasInputMonitoringPermission)
         #expect(!monitor.isRunning)
@@ -318,7 +322,7 @@ struct SwitchingControllerTests {
 
     @Test("監視中に許可が外れたら、状態に反映してまた許可を待つ")
     func reflectsRevokedPermission() {
-        let (controller, monitor, _, _, permission) = Self.make()
+        let (controller, monitor, _, _, permission, _) = Self.make()
         controller.start()
 
         // システム設定で許可が外されると、タップが無効になって監視が止まる。
@@ -338,7 +342,7 @@ struct SwitchingControllerTests {
 
     @Test("許可されているなら、待たずにそのまま監視を始める")
     func doesNotWatchWhenAlreadyGranted() {
-        let (controller, monitor, _, _, permission) = Self.make()
+        let (controller, monitor, _, _, permission, _) = Self.make()
 
         controller.start()
 
@@ -350,15 +354,15 @@ struct SwitchingControllerTests {
 
     @Test("有効の状態を、許可と監視の様子から決める")
     func reportsStatus() {
-        let (disabled, _, _, _, _) = Self.make(storedIsEnabled: false)
+        let (disabled, _, _, _, _, _) = Self.make(storedIsEnabled: false)
         disabled.start()
         #expect(disabled.status == .disabled)
 
-        let (waiting, _, _, _, _) = Self.make(isGranted: false)
+        let (waiting, _, _, _, _, _) = Self.make(isGranted: false)
         waiting.start()
         #expect(waiting.status == .needsPermission)
 
-        let (running, _, _, _, _) = Self.make()
+        let (running, _, _, _, _, _) = Self.make()
         running.start()
         #expect(running.status == .running)
         #expect(running.isMonitoring)
@@ -366,7 +370,7 @@ struct SwitchingControllerTests {
 
     @Test("許可されているのに監視を始められなかったら、未許可とは別の状態にする")
     func reportsFailureToStart() {
-        let (controller, monitor, _, _, permission) = Self.make()
+        let (controller, monitor, _, _, permission, _) = Self.make()
         monitor.failsToStart = true
 
         controller.start()
@@ -380,7 +384,7 @@ struct SwitchingControllerTests {
 
     @Test("許可されたのに監視を始められなかったら、始められなかったと知らせる")
     func reportsFailureAfterGrant() {
-        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        let (controller, monitor, _, _, permission, _) = Self.make(isGranted: false)
         monitor.failsToStart = true
         controller.start()
 
@@ -391,7 +395,7 @@ struct SwitchingControllerTests {
 
     @Test("始められなかったあと、もう一度試して始められたら動き出す")
     func retryStartsMonitor() {
-        let (controller, monitor, _, _, _) = Self.make()
+        let (controller, monitor, _, _, _, _) = Self.make()
         monitor.failsToStart = true
         controller.start()
 
@@ -404,7 +408,7 @@ struct SwitchingControllerTests {
 
     @Test("もう一度試しても始められなければ、そのまま知らせ続ける")
     func retryFailsAgain() {
-        let (controller, monitor, _, _, _) = Self.make()
+        let (controller, monitor, _, _, _, _) = Self.make()
         monitor.failsToStart = true
         controller.start()
 
@@ -416,7 +420,7 @@ struct SwitchingControllerTests {
 
     @Test("もう一度試す間に許可が外れていたら、許可を待つ")
     func retryWaitsForPermissionWhenRevoked() {
-        let (controller, monitor, _, _, permission) = Self.make()
+        let (controller, monitor, _, _, permission, _) = Self.make()
         monitor.failsToStart = true
         controller.start()
         permission.isGranted = false
@@ -430,12 +434,12 @@ struct SwitchingControllerTests {
 
     @Test("動いているときや無効のときは、もう一度試しても監視に触らない")
     func retryDoesNothingUnlessFailed() {
-        let (running, runningMonitor, _, _, _) = Self.make()
+        let (running, runningMonitor, _, _, _, _) = Self.make()
         running.start()
         running.retryMonitoring()
         #expect(runningMonitor.startCount == 1)
 
-        let (disabled, disabledMonitor, _, _, _) = Self.make(storedIsEnabled: false)
+        let (disabled, disabledMonitor, _, _, _, _) = Self.make(storedIsEnabled: false)
         disabled.start()
         disabled.retryMonitoring()
         #expect(disabledMonitor.startCount == 0)
@@ -443,7 +447,7 @@ struct SwitchingControllerTests {
 
     @Test("始められなかったあと、無効にして有効に戻すと試し直す")
     func reenablingRetries() {
-        let (controller, monitor, _, _, _) = Self.make()
+        let (controller, monitor, _, _, _, _) = Self.make()
         monitor.failsToStart = true
         controller.start()
 
@@ -458,7 +462,7 @@ struct SwitchingControllerTests {
 
     @Test("監視中に許可が外れたら、動いていない状態にする")
     func permissionLossStopsMonitoringState() {
-        let (controller, monitor, _, _, permission) = Self.make()
+        let (controller, monitor, _, _, permission, _) = Self.make()
         controller.start()
 
         permission.change(to: false)
@@ -468,9 +472,90 @@ struct SwitchingControllerTests {
         #expect(controller.status == .needsPermission)
     }
 
+    @Test("アクセシビリティが未許可なら監視を始めず、確認ダイアログを出して許可を待つ")
+    func waitsForPostEventPermission() {
+        let (controller, monitor, _, _, inputMonitoring, postEvent) = Self.make(isPostEventGranted: false)
+
+        controller.start()
+
+        #expect(controller.status == .needsPermission)
+        #expect(controller.missingPermissions == [.postEvent])
+        #expect(monitor.startCount == 0)
+        #expect(postEvent.requestCount == 1)
+        // 許可済みの入力監視には確認ダイアログを出さない。
+        #expect(inputMonitoring.requestCount == 0)
+        #expect(postEvent.isWatching)
+    }
+
+    @Test("どちらも未許可なら、両方の確認ダイアログを出す")
+    func requestsBothPermissions() {
+        let (controller, _, _, _, inputMonitoring, postEvent) = Self.make(isGranted: false, isPostEventGranted: false)
+
+        controller.start()
+
+        #expect(controller.missingPermissions == [.inputMonitoring, .postEvent])
+        #expect(inputMonitoring.requestCount == 1)
+        #expect(postEvent.requestCount == 1)
+    }
+
+    @Test("片方だけ許可されても始めず、両方そろったら始める")
+    func startsMonitorOnceBothAreGranted() {
+        let (controller, monitor, _, _, inputMonitoring, postEvent) = Self.make(isGranted: false, isPostEventGranted: false)
+        controller.start()
+
+        inputMonitoring.change(to: true)
+
+        #expect(controller.hasInputMonitoringPermission)
+        #expect(controller.status == .needsPermission)
+        #expect(monitor.startCount == 0)
+
+        postEvent.change(to: true)
+
+        #expect(controller.status == .running)
+        #expect(monitor.startCount == 1)
+        #expect(!inputMonitoring.isWatching)
+        #expect(!postEvent.isWatching)
+    }
+
+    @Test("「アクセシビリティの設定を開く」で、アクセシビリティの設定を開く")
+    func opensPostEventSettings() {
+        let (controller, monitor, _, _, inputMonitoring, postEvent) = Self.make(isPostEventGranted: false)
+        controller.start()
+
+        controller.openSystemSettings(for: .postEvent)
+        postEvent.change(to: true)
+
+        #expect(postEvent.openSettingsCount == 1)
+        #expect(inputMonitoring.openSettingsCount == 0)
+        #expect(monitor.isRunning)
+    }
+
+    @Test("監視中にアクセシビリティが外れていたら、キーを送らずに監視を止めて許可を待つ")
+    func stopsWhenPostEventPermissionIsRevoked() {
+        let (controller, monitor, switcher, _, _, postEvent) = Self.make()
+        controller.start()
+        // 外されても知らせは来ないので、次に ⌘ を押したときに気づく。
+        postEvent.isGranted = false
+
+        monitor.emit(.left)
+
+        #expect(switcher.activated.isEmpty)
+        #expect(!monitor.isRunning)
+        #expect(controller.status == .needsPermission)
+        #expect(controller.missingPermissions == [.postEvent])
+        #expect(postEvent.isWatching)
+
+        // 許可し直されたら、また動き出す。
+        postEvent.change(to: true)
+
+        #expect(controller.status == .running)
+        monitor.emit(.right)
+        #expect(switcher.activated == [.kana])
+    }
+
     @Test("終了時に監視を止める")
     func stopStopsMonitor() {
-        let (controller, monitor, _, _, _) = Self.make()
+        let (controller, monitor, _, _, _, _) = Self.make()
         controller.start()
 
         controller.stop()

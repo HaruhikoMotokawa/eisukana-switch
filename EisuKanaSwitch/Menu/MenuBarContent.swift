@@ -13,9 +13,11 @@ struct MenuBarContent: View {
         // 無効のときは元々切り替えないので、何も出さない。
         switch controller.status {
         case .needsPermission:
-            Text("permission_menu_status")
-            Button("permission_open_settings") {
-                controller.openInputMonitoringSettings()
+            ForEach(controller.missingPermissions, id: \.self) { kind in
+                Text(kind.menuStatus)
+                Button(kind.openSettingsTitle) {
+                    controller.openSystemSettings(for: kind)
+                }
             }
             Divider()
         case .failedToStart:

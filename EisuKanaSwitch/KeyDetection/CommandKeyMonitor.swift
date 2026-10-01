@@ -20,7 +20,8 @@ protocol CommandKeyMonitoring: AnyObject {
 
 /// listen-only の `CGEventTap` でキー入力を監視し、左右 ⌘ の単独押下を通知する。
 ///
-/// イベントを止めたり書き換えたりはしないので、必要な権限は「入力監視」だけ（Spike #1）。
+/// イベントを止めたり書き換えたりはしないので、監視に要る権限は「入力監視」だけ（Spike #1）。
+/// 切り替えのキーを送るためのアクセシビリティは、`JISKeySwitcher` の側で要る（#32）。
 @MainActor
 final class CommandKeyMonitor: CommandKeyMonitoring {
     var onSoloCommand: ((CommandSide) -> Void)?

@@ -137,6 +137,40 @@
         }
       }
     },
+    "accessibility_menu_status" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Accessibility not allowed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ アクセシビリティが未許可です"
+          }
+        }
+      }
+    },
+    "accessibility_open_settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Accessibility Settings…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセシビリティの設定を開く…"
+          }
+        }
+      }
+    },
     "enabled" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -150,6 +184,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有効"
+          }
+        }
+      }
+    },
+    "input_monitoring_menu_status" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Input Monitoring not allowed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ 入力監視が未許可です"
+          }
+        }
+      }
+    },
+    "input_monitoring_open_settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Input Monitoring Settings…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入力監視の設定を開く…"
           }
         }
       }
@@ -262,13 +330,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "EisuKana Switch: Input Monitoring not allowed"
+            "value" : "EisuKana Switch: permission required"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "EisuKana Switch: 入力監視が未許可"
+            "value" : "EisuKana Switch: 許可が必要"
           }
         }
       }
@@ -279,13 +347,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Input Monitoring is allowed, but switching could not be started. Please try again."
+            "value" : "Permissions are allowed, but switching could not be started. Please try again."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "入力監視は許可されていますが、切り替えを開始できませんでした。もう一度試してください。"
+            "value" : "許可はされていますが、切り替えを開始できませんでした。もう一度試してください。"
           }
         }
       }
@@ -324,19 +392,70 @@
         }
       }
     },
+    "permission_accessibility" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセシビリティ"
+          }
+        }
+      }
+    },
+    "permission_accessibility_reason" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To send the 英数 / かな keys that switch the input"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「英数」「かな」キーを送って切り替えるため"
+          }
+        }
+      }
+    },
+    "permission_allowed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allowed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "許可済み"
+          }
+        }
+      }
+    },
     "permission_body" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "EisuKana Switch needs Input Monitoring access to notice the left and right ⌘ keys. Allow it in System Settings > Privacy & Security > Input Monitoring."
+            "value" : "To switch input with the left and right ⌘ keys, allow the following in System Settings > Privacy & Security."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "左右の ⌘ キーが押されたことを知るために、「入力監視」の許可が必要です。システム設定 > プライバシーとセキュリティ > 入力監視 で EisuKana Switch をオンにしてください。"
+            "value" : "左右の ⌘ キーで英数 / かなを切り替えるために、システム設定 > プライバシーとセキュリティ で次の 2 つを許可してください。"
           }
         }
       }
@@ -381,13 +500,47 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Input Monitoring is allowed"
+            "value" : "Permissions are allowed"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "入力監視が許可されました"
+            "value" : "許可されました"
+          }
+        }
+      }
+    },
+    "permission_input_monitoring" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Input Monitoring"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "入力監視"
+          }
+        }
+      }
+    },
+    "permission_input_monitoring_reason" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To notice the ⌘ keys"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⌘ キーが押されたことを知るため"
           }
         }
       }
@@ -405,23 +558,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "あとで"
-          }
-        }
-      }
-    },
-    "permission_menu_status" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠️ Input Monitoring not allowed"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠️ 入力監視が未許可です"
           }
         }
       }
@@ -466,13 +602,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Input Monitoring is required"
+            "value" : "Permissions are required"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "入力監視の許可が必要です"
+            "value" : "許可が必要です"
           }
         }
       }
@@ -483,13 +619,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Input Monitoring"
+            "value" : "Permissions"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "入力監視の許可"
+            "value" : "必要な許可"
           }
         }
       }
