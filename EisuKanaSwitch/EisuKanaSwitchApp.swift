@@ -8,8 +8,8 @@ struct EisuKanaSwitchApp: App {
         MenuBarExtra {
             MenuBarContent(controller: appDelegate.controller, launchAtLogin: appDelegate.launchAtLogin)
         } label: {
-            // 塗りつぶしなら有効、線画なら無効（F-04）。有効でも入力監視が未許可なら、
-            // 切り替えが起きないことがアイコンでわかるようにする（F-06）。SF Symbols は
+            // 塗りつぶしなら有効、線画なら無効（F-04）。有効でも入力監視が未許可だったり、
+            // 監視を始められなかったりしたら、切り替えが起きないことがアイコンでわかるようにする（F-06 / #24）。SF Symbols は
             // テンプレート画像として描かれるので、ライト / ダークどちらのメニューバーでもそのまま読める。
             Image(systemName: menuBarSymbol)
                 .accessibilityLabel(Text(menuBarLabel))
@@ -24,16 +24,19 @@ struct EisuKanaSwitchApp: App {
     }
 
     private var menuBarSymbol: String {
-        guard appDelegate.controller.isEnabled else { return "command.circle" }
-        return appDelegate.controller.hasInputMonitoringPermission
-            ? "command.circle.fill"
-            : "exclamationmark.triangle.fill"
+        switch appDelegate.controller.status {
+        case .disabled: "command.circle"
+        case .running: "command.circle.fill"
+        case .needsPermission, .failedToStart: "exclamationmark.triangle.fill"
+        }
     }
 
     private var menuBarLabel: LocalizedStringKey {
-        guard appDelegate.controller.isEnabled else { return "menu_bar_disabled" }
-        return appDelegate.controller.hasInputMonitoringPermission
-            ? "menu_bar_enabled"
-            : "menu_bar_no_permission"
+        switch appDelegate.controller.status {
+        case .disabled: "menu_bar_disabled"
+        case .running: "menu_bar_enabled"
+        case .needsPermission: "menu_bar_no_permission"
+        case .failedToStart: "menu_bar_monitor_failed"
+        }
     }
 }

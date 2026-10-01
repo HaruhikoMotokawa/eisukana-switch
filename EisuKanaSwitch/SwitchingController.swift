@@ -20,6 +20,27 @@ final class SwitchingController {
     /// 入力監視が許可されているか。未許可ならメニューと案内で知らせる（F-06）。
     private(set) var hasInputMonitoringPermission: Bool
 
+    /// 監視が動いているか。許可されていても、タップを作れずに動いていないことがある（#24）。
+    private(set) var isMonitoring = false
+
+    /// メニューバーとメニューに出す状態。
+    enum Status: Equatable {
+        /// 無効にされている。
+        case disabled
+        /// 有効だが、入力監視が未許可で許可を待っている。
+        case needsPermission
+        /// 有効で許可もされているが、監視を始められなかった。
+        case failedToStart
+        /// 切り替えが動いている。
+        case running
+    }
+
+    var status: Status {
+        guard isEnabled else { return .disabled }
+        guard hasInputMonitoringPermission else { return .needsPermission }
+        return isMonitoring ? .running : .failedToStart
+    }
+
     init(
         monitor: any CommandKeyMonitoring,
         switcher: any InputSourceSwitching,
@@ -52,7 +73,7 @@ final class SwitchingController {
     /// 終了時に呼ぶ。
     func stop() {
         permission.stopWatching()
-        monitor.stop()
+        stopMonitor()
     }
 
     /// メニューからの有効/無効の切り替え。設定は即座に保存する。
@@ -64,7 +85,7 @@ final class SwitchingController {
             startMonitoring(requestingPermission: true)
         } else {
             permission.stopWatching()
-            monitor.stop()
+            stopMonitor()
         }
         Logger.app.notice("switching \(newValue ? "enabled" : "disabled", privacy: .public)")
     }
@@ -80,6 +101,16 @@ final class SwitchingController {
             hasInputMonitoringPermission = permission.isGranted
             return
         }
+        startMonitoring(requestingPermission: false)
+    }
+
+    /// メニューの「もう一度試す」から呼ぶ。監視を始められなかったときの再試行（#24）。
+    ///
+    /// 始められないのはリソース不足などの一時的な理由なので、自動で繰り返さず、
+    /// ユーザーが試し直せるようにしておく。試す間に許可が外れていることもあるので、許可から見直す。
+    func retryMonitoring() {
+        guard status == .failedToStart else { return }
+        Logger.app.notice("retrying to start the monitor")
         startMonitoring(requestingPermission: false)
     }
 
@@ -105,11 +136,17 @@ final class SwitchingController {
     }
 
     /// 監視を始める。許可されているのに始められないのは普通は起きないが、起きると
-    /// 何も反応しないまま「有効」に見えてしまうので、ログには残す。
+    /// 何も反応しないまま「有効」に見えてしまうので、`isMonitoring` に残して表示で知らせる（#24）。
     private func startMonitor() {
-        if !monitor.start() {
+        isMonitoring = monitor.start()
+        if !isMonitoring {
             Logger.app.error("could not start the monitor although input monitoring is granted")
         }
+    }
+
+    private func stopMonitor() {
+        monitor.stop()
+        isMonitoring = false
     }
 
     /// 許可されるのを待つ。許可されたら、再起動せずにそのまま監視を始める（F-06）。
@@ -133,6 +170,7 @@ final class SwitchingController {
     private func handlePermissionLost() {
         Logger.app.error("input monitoring was revoked; the monitor has stopped")
         hasInputMonitoringPermission = false
+        isMonitoring = false
         guard isEnabled else { return }
         watchPermission()
     }

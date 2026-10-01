@@ -10,12 +10,14 @@ final class FakeCommandKeyMonitor: CommandKeyMonitoring {
     private(set) var isRunning = false
     private(set) var startCount = 0
     private(set) var stopCount = 0
+    /// タップを作れない状況（リソース不足など）を再現する。
+    var failsToStart = false
 
     @discardableResult
     func start() -> Bool {
         startCount += 1
-        isRunning = true
-        return true
+        isRunning = !failsToStart
+        return isRunning
     }
 
     func stop() {
@@ -346,6 +348,126 @@ struct SwitchingControllerTests {
         #expect(!permission.isWatching)
     }
 
+    @Test("有効の状態を、許可と監視の様子から決める")
+    func reportsStatus() {
+        let (disabled, _, _, _, _) = Self.make(storedIsEnabled: false)
+        disabled.start()
+        #expect(disabled.status == .disabled)
+
+        let (waiting, _, _, _, _) = Self.make(isGranted: false)
+        waiting.start()
+        #expect(waiting.status == .needsPermission)
+
+        let (running, _, _, _, _) = Self.make()
+        running.start()
+        #expect(running.status == .running)
+        #expect(running.isMonitoring)
+    }
+
+    @Test("許可されているのに監視を始められなかったら、未許可とは別の状態にする")
+    func reportsFailureToStart() {
+        let (controller, monitor, _, _, permission) = Self.make()
+        monitor.failsToStart = true
+
+        controller.start()
+
+        #expect(controller.hasInputMonitoringPermission)
+        #expect(!controller.isMonitoring)
+        #expect(controller.status == .failedToStart)
+        // 許可の問題ではないので、許可は待たない。
+        #expect(!permission.isWatching)
+    }
+
+    @Test("許可されたのに監視を始められなかったら、始められなかったと知らせる")
+    func reportsFailureAfterGrant() {
+        let (controller, monitor, _, _, permission) = Self.make(isGranted: false)
+        monitor.failsToStart = true
+        controller.start()
+
+        permission.change(to: true)
+
+        #expect(controller.status == .failedToStart)
+    }
+
+    @Test("始められなかったあと、もう一度試して始められたら動き出す")
+    func retryStartsMonitor() {
+        let (controller, monitor, _, _, _) = Self.make()
+        monitor.failsToStart = true
+        controller.start()
+
+        monitor.failsToStart = false
+        controller.retryMonitoring()
+
+        #expect(controller.status == .running)
+        #expect(monitor.startCount == 2)
+    }
+
+    @Test("もう一度試しても始められなければ、そのまま知らせ続ける")
+    func retryFailsAgain() {
+        let (controller, monitor, _, _, _) = Self.make()
+        monitor.failsToStart = true
+        controller.start()
+
+        controller.retryMonitoring()
+
+        #expect(controller.status == .failedToStart)
+        #expect(monitor.startCount == 2)
+    }
+
+    @Test("もう一度試す間に許可が外れていたら、許可を待つ")
+    func retryWaitsForPermissionWhenRevoked() {
+        let (controller, monitor, _, _, permission) = Self.make()
+        monitor.failsToStart = true
+        controller.start()
+        permission.isGranted = false
+
+        controller.retryMonitoring()
+
+        #expect(controller.status == .needsPermission)
+        #expect(permission.isWatching)
+        #expect(monitor.startCount == 1)
+    }
+
+    @Test("動いているときや無効のときは、もう一度試しても監視に触らない")
+    func retryDoesNothingUnlessFailed() {
+        let (running, runningMonitor, _, _, _) = Self.make()
+        running.start()
+        running.retryMonitoring()
+        #expect(runningMonitor.startCount == 1)
+
+        let (disabled, disabledMonitor, _, _, _) = Self.make(storedIsEnabled: false)
+        disabled.start()
+        disabled.retryMonitoring()
+        #expect(disabledMonitor.startCount == 0)
+    }
+
+    @Test("始められなかったあと、無効にして有効に戻すと試し直す")
+    func reenablingRetries() {
+        let (controller, monitor, _, _, _) = Self.make()
+        monitor.failsToStart = true
+        controller.start()
+
+        controller.setEnabled(false)
+        #expect(controller.status == .disabled)
+
+        monitor.failsToStart = false
+        controller.setEnabled(true)
+
+        #expect(controller.status == .running)
+    }
+
+    @Test("監視中に許可が外れたら、動いていない状態にする")
+    func permissionLossStopsMonitoringState() {
+        let (controller, monitor, _, _, permission) = Self.make()
+        controller.start()
+
+        permission.change(to: false)
+        monitor.losePermission()
+
+        #expect(!controller.isMonitoring)
+        #expect(controller.status == .needsPermission)
+    }
+
     @Test("終了時に監視を止める")
     func stopStopsMonitor() {
         let (controller, monitor, _, _, _) = Self.make()
@@ -354,6 +476,7 @@ struct SwitchingControllerTests {
         controller.stop()
 
         #expect(!monitor.isRunning)
+        #expect(!controller.isMonitoring)
         #expect(monitor.stopCount == 1)
     }
 }

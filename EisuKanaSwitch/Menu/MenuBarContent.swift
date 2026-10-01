@@ -9,14 +9,24 @@ struct MenuBarContent: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        // 有効なのに未許可だと切り替えが起きないので、理由と行き先を一番上に出す（F-06）。
-        // 無効のときは元々切り替えないので、許可の話は出さない。
-        if controller.isEnabled, !controller.hasInputMonitoringPermission {
+        // 有効なのに切り替えが起きないときは、理由と打つ手を一番上に出す（F-06 / #24）。
+        // 無効のときは元々切り替えないので、何も出さない。
+        switch controller.status {
+        case .needsPermission:
             Text("permission_menu_status")
             Button("permission_open_settings") {
                 controller.openInputMonitoringSettings()
             }
             Divider()
+        case .failedToStart:
+            // 許可はされているので、システム設定へは案内しない。
+            Text("monitor_failed_menu_status")
+            Button("monitor_failed_retry") {
+                controller.retryMonitoring()
+            }
+            Divider()
+        case .disabled, .running:
+            EmptyView()
         }
         Toggle("enabled", isOn: Binding(
             get: { controller.isEnabled },
