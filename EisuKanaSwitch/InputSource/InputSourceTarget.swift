@@ -1,11 +1,20 @@
-import Foundation
+import Carbon.HIToolbox
+import CoreGraphics
 
 /// 切り替え先の入力モード。
 enum InputSourceTarget: String, CaseIterable, Sendable {
-    /// 英数。IME の英数モード、または ABC などの ASCII 入力可能なキーボードレイアウト。
+    /// 英数。
     case eisu
-    /// かな。日本語 IME のひらがなモード。
+    /// かな。
     case kana
+
+    /// JIS キーボードの「英数」「かな」キー。どの入力ソースへ移るかは IME に任せる（#32）。
+    var jisKeyCode: CGKeyCode {
+        switch self {
+        case .eisu: CGKeyCode(kVK_JIS_Eisu)
+        case .kana: CGKeyCode(kVK_JIS_Kana)
+        }
+    }
 }
 
 extension CommandSide {

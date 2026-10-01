@@ -1,91 +1,47 @@
-import Foundation
-import os
-
-/// 切り替えの結果。
-enum InputSourceSwitchResult: Equatable, Sendable {
-    /// 切り替えた。
-    case switched(id: String)
-    /// すでに目的のモードだったので、何もしなかった。
-    case alreadyActive
-    /// 有効な入力ソースに候補が無かった。
-    /// 英数でこれが返るのは、ABC などを無効にして IME だけを使っている環境。
-    case noCandidate
-    /// `TISSelectInputSource` が失敗した。
-    case failed(OSStatus)
-}
+import CoreGraphics
+import OSLog
 
 /// 入力ソースを英数 / かなへ切り替える。#3 の検出結果はここへ入ってくる。
 @MainActor
 protocol InputSourceSwitching: AnyObject {
+    /// 切り替えのキーを送る。送れなかったら false。
     @discardableResult
-    func activate(_ target: InputSourceTarget) -> InputSourceSwitchResult
+    func activate(_ target: InputSourceTarget) -> Bool
 }
 
 extension InputSourceSwitching {
     /// 左 ⌘ なら英数、右 ⌘ ならかなへ切り替える（F-01 / F-02）。
     @discardableResult
-    func activate(for side: CommandSide) -> InputSourceSwitchResult {
+    func activate(for side: CommandSide) -> Bool {
         activate(side.inputSourceTarget)
     }
 }
 
-/// `InputSourceRepository` から状態を集めて `InputSourceSelector` に渡し、結果を適用する。
+/// JIS キーボードの「英数」「かな」キーを押したことにして切り替える（#32）。
+///
+/// `TISSelectInputSource` で IME を選ぶと、メニューバーの表示は変わっても、前面のアプリの
+/// 入力モードは変わらない（macOS の既知の不具合）。キーを送れば、本物のキーを押したときと同じく
+/// 前面のアプリの IME が受け取るので、確実に切り替わる。
+///
+/// 送るには「アクセシビリティ」（PostEvent）の許可が要る。未許可だとエラーも出ずに捨てられるので、
+/// 許可の確認は呼ぶ側（`SwitchingController`）が先に済ませておく（Spike #1）。
 @MainActor
-final class InputSourceSwitcher: InputSourceSwitching {
-    private let repository: InputSourceRepository
-    private let logger: Logger
-
-    /// 直前に離れたかな入力ソースのバンドル ID。
-    /// ABC ↔ かなを往復するとき、複数 IME を有効にしていても元の IME に戻れるようにする。
-    private var preferredKanaBundleID: String?
-
-    init(
-        repository: InputSourceRepository,
-        logger: Logger = Logger(
-            subsystem: Bundle.main.bundleIdentifier ?? "io.github.haruhikomotokawa.EisuKanaSwitch",
-            category: "InputSource"
-        )
-    ) {
-        self.repository = repository
-        self.logger = logger
-    }
-
-    @discardableResult
-    func activate(_ target: InputSourceTarget) -> InputSourceSwitchResult {
-        let current = repository.currentSource()
-        rememberKanaSource(current)
-
-        let enabled = repository.enabledSources()
-        let selection = InputSourceSelector.selection(
-            for: target,
-            current: current,
-            enabled: enabled,
-            asciiCapableSourceID: repository.asciiCapableSourceID(),
-            preferredKanaBundleID: preferredKanaBundleID
-        )
-
-        switch selection {
-        case .alreadyActive:
-            return .alreadyActive
-        case .noCandidate:
-            // 英数の候補が無い環境（ABC を無効にして IME だけにしている等）。
-            // メニューでの案内は #5 / #6 で扱う。
-            logger.notice("no input source for \(target.rawValue, privacy: .public)")
-            return .noCandidate
-        case .select(let descriptor):
-            let status = repository.select(descriptor)
-            guard status == noErr else {
-                logger.error("TISSelectInputSource(\(descriptor.id, privacy: .public)) failed: \(status)")
-                return .failed(status)
-            }
-            logger.debug("\(target.rawValue, privacy: .public) -> \(descriptor.id, privacy: .public)")
-            return .switched(id: descriptor.id)
+final class JISKeySwitcher: InputSourceSwitching {
+    func activate(_ target: InputSourceTarget) -> Bool {
+        let source = CGEventSource(stateID: .hidSystemState)
+        guard
+            let down = CGEvent(keyboardEventSource: source, virtualKey: target.jisKeyCode, keyDown: true),
+            let up = CGEvent(keyboardEventSource: source, virtualKey: target.jisKeyCode, keyDown: false)
+        else {
+            Logger.app.error("could not create the key events for \(target.rawValue, privacy: .public)")
+            return false
         }
-    }
-
-    /// かなモードから離れる直前に、その IME を覚えておく。
-    private func rememberKanaSource(_ current: InputSourceDescriptor?) {
-        guard let current, current.isKanaMode, let bundleID = current.bundleID else { return }
-        preferredKanaBundleID = bundleID
+        // ⌘ を離した直後に送るので、修飾キーは付いていないはずだが、⌘ + 英数にならないよう明示しておく。
+        down.flags = []
+        up.flags = []
+        down.post(tap: .cghidEventTap)
+        up.post(tap: .cghidEventTap)
+        Logger.app.debug("posted \(target.rawValue, privacy: .public)")
+        return true
     }
 }

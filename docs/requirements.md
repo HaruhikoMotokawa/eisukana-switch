@@ -57,10 +57,14 @@ App Store 版と Developer ID 版は、同一のソースコード・同一の S
 
 - 実装: Swift / SwiftUI（`MenuBarExtra`）、自動起動は `SMAppService`
 - キー検出: `CGEventTap`（`flagsChanged` を監視して、左右 ⌘ の単独押下を判定する）
-- 入力ソース切り替え: `TISSelectInputSource`
-- 必要な権限は「入力監視」のみ。アクセシビリティ / PostEvent は使わない
+- 入力ソース切り替え: JIS キーボードの「英数」「かな」キー（`kVK_JIS_Eisu` / `kVK_JIS_Kana`）を `CGEvent.post` で送る
+- 必要な権限は「入力監視」と「アクセシビリティ」（PostEvent）。どちらかが未許可の間は切り替えを止めて案内する
 
-Spike #1 の結果は [spike-1-sandbox.md](spike-1-sandbox.md)、入力ソースの切り替え先の決め方は [input-source-switching.md](input-source-switching.md) を参照。App Review の判断だけは、実際に提出するまでわからない。
+当初は `TISSelectInputSource` で入力ソースを選び、アクセシビリティを使わない方針だったが、
+前面のアプリに反映されない macOS の不具合があり、確実に切り替わることを優先して改めた（#32）。
+アクセシビリティを求めるので、App Store 版（#11）の審査リスクは上がる。
+
+Spike #1 の結果は [spike-1-sandbox.md](spike-1-sandbox.md)、切り替えの仕組みと許可の扱いは [input-source-switching.md](input-source-switching.md) を参照。App Review の判断だけは、実際に提出するまでわからない。
 
 ## 7. スコープ外
 

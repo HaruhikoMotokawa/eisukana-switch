@@ -1,8 +1,8 @@
 import Foundation
 import OSLog
 
-/// ⌘ の検出（#3）と入力ソースの切り替え（#4）を繋ぎ、有効/無効（F-04）と
-/// 入力監視の許可状態（F-06）を持つ。
+/// ⌘ の検出（#3）と入力ソースの切り替え（#4 / #32）を繋ぎ、有効/無効（F-04）と
+/// 入力監視・アクセシビリティの許可状態（F-06）を持つ。
 ///
 /// 無効のときはイベントタップごと止める。イベントを受け取ってから捨てるのではなく
 /// タップを落とすので、無効の間はキー入力が一切アプリに届かないし、CPU も使わない（N-01 / N-02）。
@@ -12,13 +12,18 @@ final class SwitchingController {
     private let monitor: any CommandKeyMonitoring
     private let switcher: any InputSourceSwitching
     private let store: any EnabledStateStore
-    private let permission: any InputMonitoringPermitting
+    private let inputMonitoring: any SystemPermitting
+    private let postEvent: any SystemPermitting
 
     /// 切り替えが有効か。変更は `setEnabled(_:)` から行う。
     private(set) var isEnabled: Bool
 
     /// 入力監視が許可されているか。未許可ならメニューと案内で知らせる（F-06）。
     private(set) var hasInputMonitoringPermission: Bool
+
+    /// アクセシビリティ（PostEvent）が許可されているか。未許可だとキーを送っても捨てられるので、
+    /// 入力監視と同じく、許可されるまで監視を始めない（#32）。
+    private(set) var hasPostEventPermission: Bool
 
     /// 監視が動いているか。許可されていても、タップを作れずに動いていないことがある（#24）。
     private(set) var isMonitoring = false
@@ -27,7 +32,7 @@ final class SwitchingController {
     enum Status: Equatable {
         /// 無効にされている。
         case disabled
-        /// 有効だが、入力監視が未許可で許可を待っている。
+        /// 有効だが、入力監視かアクセシビリティが未許可で、許可を待っている。
         case needsPermission
         /// 有効で許可もされているが、監視を始められなかった。
         case failedToStart
@@ -37,22 +42,43 @@ final class SwitchingController {
 
     var status: Status {
         guard isEnabled else { return .disabled }
-        guard hasInputMonitoringPermission else { return .needsPermission }
+        guard hasAllPermissions else { return .needsPermission }
         return isMonitoring ? .running : .failedToStart
+    }
+
+    /// 切り替えに要る許可が全部そろっているか。
+    var hasAllPermissions: Bool {
+        hasInputMonitoringPermission && hasPostEventPermission
+    }
+
+    /// その許可がされているか。
+    func isGranted(_ kind: PermissionKind) -> Bool {
+        switch kind {
+        case .inputMonitoring: hasInputMonitoringPermission
+        case .postEvent: hasPostEventPermission
+        }
+    }
+
+    /// まだ許可されていないもの。案内やメニューに並べる順で返す。
+    var missingPermissions: [PermissionKind] {
+        PermissionKind.allCases.filter { !isGranted($0) }
     }
 
     init(
         monitor: any CommandKeyMonitoring,
         switcher: any InputSourceSwitching,
         store: any EnabledStateStore,
-        permission: any InputMonitoringPermitting
+        inputMonitoring: any SystemPermitting,
+        postEvent: any SystemPermitting
     ) {
         self.monitor = monitor
         self.switcher = switcher
         self.store = store
-        self.permission = permission
+        self.inputMonitoring = inputMonitoring
+        self.postEvent = postEvent
         isEnabled = store.isEnabled
-        hasInputMonitoringPermission = permission.isGranted
+        hasInputMonitoringPermission = inputMonitoring.isGranted
+        hasPostEventPermission = postEvent.isGranted
         monitor.onSoloCommand = { [weak self] side in
             self?.handleSoloCommand(side)
         }
@@ -72,7 +98,7 @@ final class SwitchingController {
 
     /// 終了時に呼ぶ。
     func stop() {
-        permission.stopWatching()
+        stopWatchingPermissions()
         stopMonitor()
     }
 
@@ -84,7 +110,7 @@ final class SwitchingController {
         if newValue {
             startMonitoring(requestingPermission: true)
         } else {
-            permission.stopWatching()
+            stopWatchingPermissions()
             stopMonitor()
         }
         Logger.app.notice("switching \(newValue ? "enabled" : "disabled", privacy: .public)")
@@ -94,11 +120,11 @@ final class SwitchingController {
     ///
     /// 見張っていない間に許可されていることがあるので、開く前に状態を見直す。
     /// まだ未許可なら、許可されたら再起動なしで始められるように見張り始める。
-    func openInputMonitoringSettings() {
-        permission.openSystemSettings()
+    func openSystemSettings(for kind: PermissionKind) {
+        permission(kind).openSystemSettings()
         guard isEnabled else {
             // 無効なら監視も待機も要らない。表示だけ合わせておく。
-            hasInputMonitoringPermission = permission.isGranted
+            refreshPermissions()
             return
         }
         startMonitoring(requestingPermission: false)
@@ -114,24 +140,26 @@ final class SwitchingController {
         startMonitoring(requestingPermission: false)
     }
 
-    /// 監視を始める。未許可なら始めず、許可されるのを待つ。
+    /// 監視を始める。どちらかが未許可なら始めず、許可されるのを待つ。
     ///
-    /// 未許可でも `CGEvent.tapCreate` は成功してしまい、イベントが届かないまま
-    /// `tapDisabledByUserInput` が繰り返されるので、権限を確認してから始める（Spike #1）。
+    /// 入力監視が未許可でも `CGEvent.tapCreate` は成功してしまい、イベントが届かないまま
+    /// `tapDisabledByUserInput` が繰り返される。アクセシビリティが未許可だと、送ったキーが
+    /// エラーも出ずに捨てられる。どちらも、権限を確認してから始める（Spike #1）。
     ///
     /// - Parameter requestingPermission: 未許可のときにシステムの確認ダイアログを出すか。
     ///   初回起動でこれが出ることで、システム設定の一覧にアプリが並ぶ。
     private func startMonitoring(requestingPermission: Bool) {
-        hasInputMonitoringPermission = permission.isGranted
-        guard hasInputMonitoringPermission else {
-            Logger.app.notice("input monitoring is not granted; waiting for it")
+        refreshPermissions()
+        guard hasAllPermissions else {
+            let missing = missingPermissions.map(\.rawValue).joined(separator: ",")
+            Logger.app.notice("not granted: \(missing, privacy: .public); waiting for it")
             if requestingPermission {
-                permission.request()
+                missingPermissions.forEach { permission($0).request() }
             }
-            watchPermission()
+            watchPermissions()
             return
         }
-        permission.stopWatching()
+        stopWatchingPermissions()
         startMonitor()
     }
 
@@ -149,36 +177,76 @@ final class SwitchingController {
         isMonitoring = false
     }
 
-    /// 許可されるのを待つ。許可されたら、再起動せずにそのまま監視を始める（F-06）。
-    private func watchPermission() {
-        permission.startWatching { [weak self] granted in
-            self?.handlePermissionChange(granted)
+    private func permission(_ kind: PermissionKind) -> any SystemPermitting {
+        switch kind {
+        case .inputMonitoring: inputMonitoring
+        case .postEvent: postEvent
         }
     }
 
-    private func handlePermissionChange(_ granted: Bool) {
-        hasInputMonitoringPermission = granted
-        guard granted else { return }
-        permission.stopWatching()
+    private func refreshPermissions() {
+        hasInputMonitoringPermission = inputMonitoring.isGranted
+        hasPostEventPermission = postEvent.isGranted
+    }
+
+    /// 許可されるのを待つ。全部そろったら、再起動せずにそのまま監視を始める（F-06）。
+    ///
+    /// 許可済みのものも見張る。待っている間に外されても、表示が古いままにならないように。
+    private func watchPermissions() {
+        for kind in PermissionKind.allCases {
+            permission(kind).startWatching { [weak self] granted in
+                self?.handlePermissionChange(kind, granted: granted)
+            }
+        }
+    }
+
+    private func stopWatchingPermissions() {
+        PermissionKind.allCases.forEach { permission($0).stopWatching() }
+    }
+
+    private func handlePermissionChange(_ kind: PermissionKind, granted: Bool) {
+        switch kind {
+        case .inputMonitoring: hasInputMonitoringPermission = granted
+        case .postEvent: hasPostEventPermission = granted
+        }
+        guard hasAllPermissions else { return }
+        stopWatchingPermissions()
         // 待っている間に無効にされていることがあるので、ここでも見ておく。
         guard isEnabled else { return }
-        Logger.app.notice("input monitoring granted; starting the monitor")
+        Logger.app.notice("all permissions granted; starting the monitor")
         startMonitor()
     }
 
-    /// 監視中に許可が外れて、監視が止まったとき。また案内を出し、許可し直されるのを待つ。
+    /// 監視中に入力監視の許可が外れて、監視が止まったとき。また案内を出し、許可し直されるのを待つ。
     private func handlePermissionLost() {
         Logger.app.error("input monitoring was revoked; the monitor has stopped")
         hasInputMonitoringPermission = false
         isMonitoring = false
         guard isEnabled else { return }
-        watchPermission()
+        watchPermissions()
+    }
+
+    /// 監視中にアクセシビリティの許可が外れていたとき。キーを送っても捨てられるだけなので、
+    /// 入力監視が外れたときと同じく監視を止めて、許可し直されるのを待つ。
+    private func handlePostEventPermissionLost() {
+        Logger.app.error("accessibility was revoked; stopping the monitor")
+        hasPostEventPermission = false
+        stopMonitor()
+        guard isEnabled else { return }
+        watchPermissions()
     }
 
     /// 無効のときはタップを止めてあるので普通は呼ばれないが、止める前に届いた
     /// イベントで切り替わってしまわないように、ここでも見ておく。
+    ///
+    /// アクセシビリティは、外されてもタップのように知らせてくれないので、送る前に毎回確かめる。
+    /// ⌘ の単独押下のときにしか呼ばれないので、毎回でも負担にならない（N-01）。
     private func handleSoloCommand(_ side: CommandSide) {
         guard isEnabled else { return }
+        guard postEvent.isGranted else {
+            handlePostEventPermissionLost()
+            return
+        }
         switcher.activate(for: side)
     }
 }
