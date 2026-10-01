@@ -37,7 +37,7 @@ struct AboutView: View {
         .frame(width: 340)
     }
 
-    /// アプリのアイコン。#19 で差し替わるまでは、Xcode の既定のアイコンが出る。
+    /// アプリのアイコン（AppIcon.appiconset）。
     private var appIcon: some View {
         Image(nsImage: NSApp.applicationIconImage)
             .resizable()
