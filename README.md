@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="design/app-icon/AppIcon-1024.png" width="128" alt="EisuKana Switch のアイコン">
+</p>
+
 # EisuKana Switch
 
 [English](README.en.md)
