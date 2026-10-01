@@ -11,7 +11,7 @@
 
 - Mac App Store
 - [GitHub Releases](https://github.com/HaruhikoMotokawa/eisukana-switch/releases)（Developer ID 署名・公証済みの zip / dmg）
-- Homebrew: `brew install --cask HaruhikoMotokawa/tap/eisukana-switch`
+- Homebrew: `brew install --cask HaruhikoMotokawa/tap/eisukana-switch`（[HaruhikoMotokawa/homebrew-tap](https://github.com/HaruhikoMotokawa/homebrew-tap)）
 
 ## 謝辞
 
