@@ -18,12 +18,7 @@
 		AA010000000000000000000A /* SoloCommandDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA020000000000000000000C /* SoloCommandDetectorTests.swift */; };
 		AA010000000000000000000B /* ModifierFlagsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA020000000000000000000D /* ModifierFlagsTests.swift */; };
 		AA0100000000000000000020 /* InputSourceTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000020 /* InputSourceTarget.swift */; };
-		AA0100000000000000000021 /* InputSourceDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000021 /* InputSourceDescriptor.swift */; };
-		AA0100000000000000000022 /* InputSourceSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000022 /* InputSourceSelector.swift */; };
-		AA0100000000000000000023 /* InputSourceRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000023 /* InputSourceRepository.swift */; };
 		AA0100000000000000000024 /* InputSourceSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000024 /* InputSourceSwitcher.swift */; };
-		AA0100000000000000000025 /* InputSourceFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000025 /* InputSourceFixtures.swift */; };
-		AA0100000000000000000026 /* InputSourceSelectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000026 /* InputSourceSelectorTests.swift */; };
 		AA0100000000000000000027 /* InputSourceSwitcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000027 /* InputSourceSwitcherTests.swift */; };
 		AA0100000000000000000030 /* SwitchingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000030 /* SwitchingController.swift */; };
 		AA0100000000000000000031 /* EnabledStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000031 /* EnabledStateStore.swift */; };
@@ -32,7 +27,7 @@
 		AA0100000000000000000034 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000034 /* AppInfo.swift */; };
 		AA0100000000000000000035 /* SwitchingControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000035 /* SwitchingControllerTests.swift */; };
 		AA0100000000000000000036 /* AppInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000036 /* AppInfoTests.swift */; };
-		AA0100000000000000000040 /* InputMonitoringPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000040 /* InputMonitoringPermission.swift */; };
+		AA0100000000000000000040 /* SystemPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000040 /* SystemPermission.swift */; };
 		AA0100000000000000000041 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000041 /* PermissionView.swift */; };
 		AA0100000000000000000042 /* PermissionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000042 /* PermissionWindowController.swift */; };
 		AA0100000000000000000050 /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200000000000000000050 /* LaunchAtLogin.swift */; };
@@ -65,12 +60,7 @@
 		AA0200000000000000000010 /* EisuKanaSwitch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EisuKanaSwitch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0200000000000000000011 /* EisuKanaSwitchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EisuKanaSwitchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0200000000000000000020 /* InputSourceTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceTarget.swift; sourceTree = "<group>"; };
-		AA0200000000000000000021 /* InputSourceDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceDescriptor.swift; sourceTree = "<group>"; };
-		AA0200000000000000000022 /* InputSourceSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceSelector.swift; sourceTree = "<group>"; };
-		AA0200000000000000000023 /* InputSourceRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceRepository.swift; sourceTree = "<group>"; };
 		AA0200000000000000000024 /* InputSourceSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceSwitcher.swift; sourceTree = "<group>"; };
-		AA0200000000000000000025 /* InputSourceFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceFixtures.swift; sourceTree = "<group>"; };
-		AA0200000000000000000026 /* InputSourceSelectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceSelectorTests.swift; sourceTree = "<group>"; };
 		AA0200000000000000000027 /* InputSourceSwitcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceSwitcherTests.swift; sourceTree = "<group>"; };
 		AA0200000000000000000030 /* SwitchingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchingController.swift; sourceTree = "<group>"; };
 		AA0200000000000000000031 /* EnabledStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnabledStateStore.swift; sourceTree = "<group>"; };
@@ -79,7 +69,7 @@
 		AA0200000000000000000034 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		AA0200000000000000000035 /* SwitchingControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchingControllerTests.swift; sourceTree = "<group>"; };
 		AA0200000000000000000036 /* AppInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoTests.swift; sourceTree = "<group>"; };
-		AA0200000000000000000040 /* InputMonitoringPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMonitoringPermission.swift; sourceTree = "<group>"; };
+		AA0200000000000000000040 /* SystemPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPermission.swift; sourceTree = "<group>"; };
 		AA0200000000000000000041 /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
 		AA0200000000000000000042 /* PermissionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionWindowController.swift; sourceTree = "<group>"; };
 		AA0200000000000000000050 /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
@@ -138,8 +128,6 @@
 			children = (
 				AA020000000000000000000C /* SoloCommandDetectorTests.swift */,
 				AA020000000000000000000D /* ModifierFlagsTests.swift */,
-				AA0200000000000000000025 /* InputSourceFixtures.swift */,
-				AA0200000000000000000026 /* InputSourceSelectorTests.swift */,
 				AA0200000000000000000027 /* InputSourceSwitcherTests.swift */,
 				AA0200000000000000000035 /* SwitchingControllerTests.swift */,
 				AA0200000000000000000036 /* AppInfoTests.swift */,
@@ -180,9 +168,6 @@
 			isa = PBXGroup;
 			children = (
 				AA0200000000000000000020 /* InputSourceTarget.swift */,
-				AA0200000000000000000021 /* InputSourceDescriptor.swift */,
-				AA0200000000000000000022 /* InputSourceSelector.swift */,
-				AA0200000000000000000023 /* InputSourceRepository.swift */,
 				AA0200000000000000000024 /* InputSourceSwitcher.swift */,
 			);
 			path = InputSource;
@@ -209,7 +194,7 @@
 		AA070000000000000000000A /* Permission */ = {
 			isa = PBXGroup;
 			children = (
-				AA0200000000000000000040 /* InputMonitoringPermission.swift */,
+				AA0200000000000000000040 /* SystemPermission.swift */,
 				AA0200000000000000000041 /* PermissionView.swift */,
 				AA0200000000000000000042 /* PermissionWindowController.swift */,
 			);
@@ -323,9 +308,6 @@
 				AA0100000000000000000008 /* CommandKeyMonitor.swift in Sources */,
 				AA0100000000000000000009 /* Logger+Category.swift in Sources */,
 				AA0100000000000000000020 /* InputSourceTarget.swift in Sources */,
-				AA0100000000000000000021 /* InputSourceDescriptor.swift in Sources */,
-				AA0100000000000000000022 /* InputSourceSelector.swift in Sources */,
-				AA0100000000000000000023 /* InputSourceRepository.swift in Sources */,
 				AA0100000000000000000024 /* InputSourceSwitcher.swift in Sources */,
 				AA0100000000000000000030 /* SwitchingController.swift in Sources */,
 				AA0100000000000000000031 /* EnabledStateStore.swift in Sources */,
@@ -333,7 +315,7 @@
 				AA0100000000000000000032 /* MenuBarContent.swift in Sources */,
 				AA0100000000000000000033 /* AboutView.swift in Sources */,
 				AA0100000000000000000034 /* AppInfo.swift in Sources */,
-				AA0100000000000000000040 /* InputMonitoringPermission.swift in Sources */,
+				AA0100000000000000000040 /* SystemPermission.swift in Sources */,
 				AA0100000000000000000041 /* PermissionView.swift in Sources */,
 				AA0100000000000000000042 /* PermissionWindowController.swift in Sources */,
 			);
@@ -345,8 +327,6 @@
 			files = (
 				AA010000000000000000000A /* SoloCommandDetectorTests.swift in Sources */,
 				AA010000000000000000000B /* ModifierFlagsTests.swift in Sources */,
-				AA0100000000000000000025 /* InputSourceFixtures.swift in Sources */,
-				AA0100000000000000000026 /* InputSourceSelectorTests.swift in Sources */,
 				AA0100000000000000000027 /* InputSourceSwitcherTests.swift in Sources */,
 				AA0100000000000000000035 /* SwitchingControllerTests.swift in Sources */,
 				AA0100000000000000000036 /* AppInfoTests.swift in Sources */,

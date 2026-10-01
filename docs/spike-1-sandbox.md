@@ -9,6 +9,11 @@
 **「listen-only の CGEventTap（入力監視の権限だけ）」＋「`TISSelectInputSource`」の組み合わせを採用する。**
 アクセシビリティとイベント送信（PostEvent）の権限は使わない。
 
+> **追記（2026-10-01, #32）**: 方式 B（`TISSelectInputSource`）は、メニューバーの表示は変わっても
+> 前面のアプリの入力モードが変わらないことがわかり、方式 A（キーイベントの送信）に切り替えた。
+> 下の「切り替え後、文字を打っても問題なし」は、切り替えた Spike アプリ自身のウインドウで打って確かめたもので、
+> 他のアプリでは確かめていなかった。詳しくは [input-source-switching.md](input-source-switching.md)。
+
 ## 結果
 
 | 項目 | 必要な権限 | 結果 |
