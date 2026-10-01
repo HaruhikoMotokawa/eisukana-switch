@@ -17,16 +17,15 @@
 
 ## GitHub Secrets
 
-リポジトリの Settings → Secrets and variables → Actions に、次の 6 つを登録する。
+リポジトリの Settings → Secrets and variables → Actions に、次の 5 つを登録する。Team ID は証明書の名前から取り出すので登録しなくてよい。
 
 | Secret | 内容 |
 | --- | --- |
-| `APPLE_TEAM_ID` | Team ID（10 文字）。developer.apple.com の Membership details で確認できる |
-| `DEVELOPER_ID_CERTIFICATE_P12_BASE64` | Developer ID Application 証明書と秘密鍵を書き出した `.p12` を base64 にしたもの |
-| `DEVELOPER_ID_CERTIFICATE_PASSWORD` | `.p12` を書き出したときに付けたパスワード |
-| `APP_STORE_CONNECT_API_KEY_P8_BASE64` | App Store Connect API キー（`.p8`）を base64 にしたもの |
-| `APP_STORE_CONNECT_API_KEY_ID` | API キーの Key ID |
-| `APP_STORE_CONNECT_API_ISSUER_ID` | API キーの Issuer ID |
+| `DEVELOPER_ID_CERT_P12_BASE64` | Developer ID Application 証明書と秘密鍵を書き出した `.p12` を base64 にしたもの |
+| `DEVELOPER_ID_CERT_PASSWORD` | `.p12` を書き出したときに付けたパスワード |
+| `ASC_API_KEY_P8_BASE64` | App Store Connect API キー（`.p8`）を base64 にしたもの |
+| `ASC_API_KEY_ID` | API キーの Key ID |
+| `ASC_API_ISSUER_ID` | API キーの Issuer ID |
 
 ### 証明書（.p12）
 
